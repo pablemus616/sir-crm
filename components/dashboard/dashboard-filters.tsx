@@ -14,7 +14,7 @@ const STATUS_OPTIONS = [
 ];
 
 function DashboardFiltersInner() {
-  const { filters, setFilter, reset } = useDashboardFilters();
+  const { filters, setFilter, setFilters, reset } = useDashboardFilters();
 
   const sectors = useList<{ id: number; name: string }>('sectors', { limit: 200 });
   const areas = useList<{ id: number; name: string }>('position-areas', { limit: 200 });
@@ -35,10 +35,7 @@ function DashboardFiltersInner() {
       <DateRangeFilter
         from={filters.from}
         to={filters.to}
-        onChange={(from, to) => {
-          setFilter('from', from);
-          setFilter('to', to);
-        }}
+        onChange={(from, to) => setFilters({ from, to })}
       />
       <FilterSelect
         placeholder="Sector"

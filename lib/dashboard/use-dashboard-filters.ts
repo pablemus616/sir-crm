@@ -36,7 +36,24 @@ export function useDashboardFilters() {
     [filters, apply],
   );
 
+  /**
+   * Aplica un parcial de filtros en un único router.replace, preservando
+   * los filtros existentes. Las claves con valor `undefined` se eliminan.
+   */
+  const setFilters = useCallback(
+    (partial: Partial<MetricsFilters>) => {
+      const next = { ...filters, ...partial };
+      (Object.keys(partial) as (keyof MetricsFilters)[]).forEach((key) => {
+        if (partial[key] === undefined) {
+          delete next[key];
+        }
+      });
+      apply(next);
+    },
+    [filters, apply],
+  );
+
   const reset = useCallback(() => apply({}), [apply]);
 
-  return { filters, setFilter, setFilters: apply, reset };
+  return { filters, setFilter, setFilters, reset };
 }
