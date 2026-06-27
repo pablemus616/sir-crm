@@ -31,6 +31,11 @@ export class ApiError extends Error {
   }
 }
 
+export type ListParams = {
+  page?: number
+  limit?: number
+} & Record<string, string | number | boolean | undefined>
+
 export function unwrap<T>(envelope: ApiEnvelope<T> | null, status: number): T {
   if (envelope && envelope.ok) {
     return envelope.data
