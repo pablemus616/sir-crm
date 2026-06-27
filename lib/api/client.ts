@@ -40,3 +40,10 @@ export async function clientFetch<T>(path: string, init: ClientFetchOptions = {}
   if (!envelope) throw new ApiError('Respuesta inválida del servidor', res.status)
   return unwrap(envelope, res.status)
 }
+
+export function apiGet<T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+): Promise<T> {
+  return clientFetch<T>(path, { params })
+}
