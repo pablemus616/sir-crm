@@ -20,10 +20,10 @@ function useMetric<T>(name: string, path: string, filters: MetricsFilters) {
   });
 }
 
-export const useOverview = () =>
+export const useOverview = (filters: MetricsFilters = {}) =>
   useQuery({
-    queryKey: metricsKeys.one('overview', {}),
-    queryFn: () => apiGet<OverviewMetrics>('metrics/overview'),
+    queryKey: metricsKeys.one('overview', filters),
+    queryFn: () => apiGet<OverviewMetrics>('metrics/overview', buildMetricsQuery(filters)),
   });
 
 export const useCommercial = (f: MetricsFilters) =>
