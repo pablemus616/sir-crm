@@ -3,7 +3,18 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import type { TypeOf, ZodType } from "zod";
+import type { SortingState } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ResourceTable } from "./resource-table";
 import { ResourceForm } from "./resource-form";
 import { ResourceDetail } from "./resource-detail";
@@ -20,12 +31,18 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<T | null>(null);
   const [detailRow, setDetailRow] = useState<T | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<T | null>(null);
 
   const params: ListParams = { page, limit };
   if (search && config.searchParam) params[config.searchParam] = search;
+  if (sorting[0]) {
+    params.sort = sorting[0].id;
+    params.order = sorting[0].desc ? "desc" : "asc";
+  }
 
   const list = hooks.useList(params);
   const create = hooks.useCreate();
@@ -51,12 +68,15 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
     }
   }
 
-  async function handleDelete(row: T) {
+  async function confirmDelete() {
+    if (!pendingDelete) return;
     try {
-      await remove.mutateAsync(row.id);
+      await remove.mutateAsync(pendingDelete.id);
       toast.success(`${config.singular} eliminado.`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo eliminar.");
+    } finally {
+      setPendingDelete(null);
     }
   }
 
@@ -81,12 +101,15 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
         onSearchChange={config.searchParam ? setSearch : undefined}
         searchPlaceholder={`Buscar ${config.label.toLowerCase()}…`}
         emptyMessage={`No hay ${config.label.toLowerCase()}.`}
+        sorting={sorting}
+        onSortingChange={setSorting}
         onView={setDetailRow}
         onEdit={openEdit}
-        onDelete={handleDelete}
+        onDelete={setPendingDelete}
       />
 
       <ResourceForm
+        key={editing ? String(editing.id) : "create"}
         open={formOpen}
         onOpenChange={setFormOpen}
         title={editing ? `Editar ${config.singular}` : `Nuevo ${config.singular}`}
@@ -103,6 +126,28 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
         row={detailRow}
         fields={config.detailFields}
       />
+
+      <AlertDialog
+        open={pendingDelete != null}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              ¿Eliminar {config.singular}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel />
+            <AlertDialogAction onClick={confirmDelete}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
