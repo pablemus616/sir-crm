@@ -331,6 +331,7 @@ git commit -m "feat(theme): configura Poppins+Inter, metadata SIR y Providers (t
 - Create: `lib/format/format.test.ts`
 - Create: `vitest.config.ts`
 - Create: `vitest.setup.ts`
+- Create: `test/stubs/server-only.ts`
 - Modify: `package.json` (script `test`, devDeps de Vitest/Testing Library)
 - Modify: `package-lock.json`
 
@@ -346,6 +347,12 @@ Esperado: instala sin `UNMET PEER DEPENDENCY` contra React 19. (`@testing-librar
 - [ ] **Step 2: Crea `vitest.setup.ts` (matchers de jest-dom para fases con componentes).**
 ```ts
 import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+afterEach(() => {
+  cleanup();
+});
 ```
 - [ ] **Step 3: Crea `vitest.config.ts` con `@vitejs/plugin-react`, entorno `jsdom`, alias `@` y setup.**
 ```ts
@@ -358,6 +365,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./", import.meta.url)),
+      "server-only": fileURLToPath(new URL("./test/stubs/server-only.ts", import.meta.url)),
     },
   },
   test: {
@@ -367,6 +375,10 @@ export default defineConfig({
     include: ["**/*.{test,spec}.{ts,tsx}"],
   },
 });
+```
+- [ ] **Step 3b: Crea `test/stubs/server-only.ts`** (stub vacío; Vitest no resuelve `server-only`, el alias del config apunta aquí — necesario para los tests de Fase 2 que importan módulos `server-only`).
+```ts
+export {};
 ```
 - [ ] **Step 4: Crea `lib/format/index.ts`.**
 ```ts
@@ -450,7 +462,7 @@ describe("formato es-GT", () => {
 - [ ] **Step 8: Verifica que el build sigue limpio (los archivos de test no deben romper el typecheck de Next).** Comando: `npm run build`. Esperado: `✓ Compiled successfully`.
 - [ ] **Step 9: Commit.**
 ```bash
-git add lib/format vitest.config.ts vitest.setup.ts package.json package-lock.json
+git add lib/format vitest.config.ts vitest.setup.ts test/stubs/server-only.ts package.json package-lock.json
 git commit -m "feat(format): helpers de Quetzales y fechas es-GT con Vitest"
 ```
 
@@ -487,16 +499,11 @@ git commit -m "chore(env): documenta SIR_API_URL en .env.example"
 
 ## Fase 2 — BFF Auth + Shell
 
-### Task 2.1: Configurar Vitest (Next 16 + React 19) y tipos base del API
+### Task 2.1: Tipos base del API (envelope, Paginated, unwrap) [TDD]
 
 **Files:**
-- Create: `vitest.config.ts`
-- Create: `test/setup.ts`
-- Create: `test/stubs/server-only.ts`
 - Create: `lib/api/types.ts`
-- Create: `.env.example`
 - Test: `test/lib/api/unwrap.test.ts`
-- Modify: `package.json` (scripts de test)
 
 **Interfaces:**
 - Produces: `interface ApiSuccess<T> { ok: true; message: string; data: T }`
@@ -506,51 +513,9 @@ git commit -m "chore(env): documenta SIR_API_URL en .env.example"
 - Produces: `class ApiError extends Error { status: number; path?: string }`
 - Produces: `function unwrap<T>(envelope: ApiEnvelope<T> | null, status: number): T`
 
-- [ ] **Step 1: Instalar dependencias de prueba.** Comando exacto:
-```bash
-npm install -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event
-```
-Esperado: `added N packages` sin errores de peer-deps bloqueantes (React 19 soportado).
+> NOTA (dedup pre-flight): Vitest + Testing Library + el stub de `server-only` + `.env.example` YA quedaron configurados en las Tasks 1.6 y 1.7. Esta tarea NO reinstala dependencias ni recrea `vitest.config.ts`/`.env.example`; SOLO añade los tipos del API y su test, reutilizando el runner existente.
 
-- [ ] **Step 2: Registrar scripts de test.** Comando:
-```bash
-npm pkg set scripts.test="vitest run" scripts.test:watch="vitest"
-```
-Esperado: sin salida; `package.json` queda con `"test"` y `"test:watch"`.
-
-- [ ] **Step 3: Stub de `server-only` para Vitest.** Vitest no es un bundler de servidor de Next; los módulos con `import 'server-only'` lanzarían al importarse en node, así que se aliasa a un módulo vacío. `test/stubs/server-only.ts`:
-```ts
-export {}
-```
-
-- [ ] **Step 4: Config de Vitest** (alias `@` + alias del stub). `vitest.config.ts`:
-```ts
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'node:path'
-
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./test/setup.ts'],
-  },
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, '.'),
-      'server-only': resolve(__dirname, 'test/stubs/server-only.ts'),
-    },
-  },
-})
-```
-
-- [ ] **Step 5: Setup de Testing Library.** `test/setup.ts`:
-```ts
-import '@testing-library/jest-dom/vitest'
-```
-
-- [ ] **Step 6: Tipos y `unwrap` del API** (puros, sin `server-only`). `lib/api/types.ts`:
+- [ ] **Step 1: Crea `lib/api/types.ts`** (tipos puros del envelope + `unwrap`, sin `server-only`).
 ```ts
 export interface ApiSuccess<T> {
   ok: true
@@ -585,7 +550,6 @@ export class ApiError extends Error {
   }
 }
 
-/** Desenvuelve el envelope del backend; lanza ApiError(message) en error. */
 export function unwrap<T>(envelope: ApiEnvelope<T> | null, status: number): T {
   if (envelope && envelope.ok) {
     return envelope.data
@@ -596,13 +560,7 @@ export function unwrap<T>(envelope: ApiEnvelope<T> | null, status: number): T {
 }
 ```
 
-- [ ] **Step 7: `.env.example`** (solo env server-side; tokens viven en cookies httpOnly). `.env.example`:
-```bash
-# Base del backend NestJS (server-side, prefijo /api incluido)
-SIR_API_URL=http://localhost:3000/api
-```
-
-- [ ] **Step 8: Test del unwrap.** `test/lib/api/unwrap.test.ts`:
+- [ ] **Step 2: Crea el test `test/lib/api/unwrap.test.ts`.**
 ```ts
 import { describe, expect, it } from 'vitest'
 import { ApiError, unwrap, type ApiEnvelope } from '@/lib/api/types'
@@ -632,16 +590,11 @@ describe('unwrap', () => {
 })
 ```
 
-- [ ] **Step 9: Verificar.** Comando:
+- [ ] **Step 3: Corre la suite.** Comando: `npm test`. Esperado: el test de `unwrap` pasa (3 tests) junto con los ya existentes.
+- [ ] **Step 4: Commit.**
 ```bash
-npm run test
-```
-Esperado: `Test Files 1 passed`, `Tests 3 passed`.
-
-- [ ] **Step 10: Commit.** Comando:
-```bash
-git add vitest.config.ts test/setup.ts test/stubs/server-only.ts test/lib/api/unwrap.test.ts lib/api/types.ts .env.example package.json package-lock.json
-git commit -m "test: configura Vitest y agrega tipos base del API (envelope/unwrap)"
+git add lib/api/types.ts test/lib/api/unwrap.test.ts
+git commit -m "feat(api): tipos del envelope (ApiEnvelope/Paginated) y unwrap con ApiError"
 ```
 
 ---
@@ -2049,61 +2002,18 @@ git commit -m "feat(shell): app shell con sidebar/topbar por rol y dashboard ini
 
 ## Fase 3 — Patrones reutilizables
 
-### Task 3.1: Configurar Vitest + Testing Library (Next 16 / React 19)
+### Task 3.1: Utilidad de test para hooks (createQueryWrapper)
 
 **Files:**
-- Create: `vitest.config.ts`
-- Create: `vitest.setup.ts`
-- Modify: `package.json` (scripts + devDependencies)
 - Create: `lib/test/query-wrapper.tsx`
 
 **Interfaces:**
-- Produces: `createQueryWrapper(): { wrapper: ({children}) => JSX, client: QueryClient }` para tests de hooks.
-- Consumes: alias `@/*` del `tsconfig.json` del template (paths `"@/*": ["./*"]`).
+- Produces: `createQueryWrapper(): { wrapper: ({ children }) => JSX.Element; client: QueryClient }` — QueryClient aislado (sin reintentos) para tests de hooks de TanStack Query.
+- Consumes: `@tanstack/react-query` (instalado en Task 1.2); Vitest + Testing Library (configurados en Task 1.6).
 
-- [ ] **Step 1: Instalar el toolchain de test compatible con React 19 / Next 16.** Comando exacto:
-```bash
-npm i -D vitest@^3 @vitejs/plugin-react@^5 vite-tsconfig-paths@^5 jsdom@^25 @testing-library/react@^16 @testing-library/dom@^10 @testing-library/user-event@^14 @testing-library/jest-dom@^6
-```
-Esperado: `added N packages` sin errores de peer-deps (Testing Library 16 declara soporte React 19).
+> NOTA (dedup pre-flight): Vitest + Testing Library + el stub de `server-only` YA quedaron configurados en la Task 1.6. Esta tarea NO recrea `vitest.config.ts` ni reinstala dependencias; SOLO añade la utilidad de test para hooks.
 
-- [ ] **Step 2: Crear `vitest.config.ts`** (jsdom + alias `@/` vía `vite-tsconfig-paths`; CSS desactivado para velocidad):
-```ts
-import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-
-export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
-  test: {
-    environment: "jsdom",
-    globals: true,
-    setupFiles: ["./vitest.setup.ts"],
-    css: false,
-    include: ["**/*.test.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "e2e"],
-  },
-});
-```
-
-- [ ] **Step 3: Crear `vitest.setup.ts`** (matchers jest-dom + cleanup automático):
-```ts
-import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
-
-afterEach(() => {
-  cleanup();
-});
-```
-
-- [ ] **Step 4: Añadir scripts a `package.json`** (bloque `"scripts"`):
-```json
-"test": "vitest",
-"test:run": "vitest run"
-```
-
-- [ ] **Step 5: Crear `lib/test/query-wrapper.tsx`** (QueryClient aislado, sin reintentos, para tests de hooks):
+- [ ] **Step 1: Crea `lib/test/query-wrapper.tsx`** (QueryClient aislado, sin reintentos, para tests de hooks).
 ```tsx
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -2121,18 +2031,12 @@ export function createQueryWrapper() {
   return { wrapper, client };
 }
 ```
-Nota: `@tanstack/react-query` se instala en la Task 3.3; este archivo compila al integrarse esa dependencia (orden de tareas respetado).
 
-- [ ] **Step 6: Verificar que el runner arranca.** Comando:
+- [ ] **Step 2: Verifica que typechequea.** Comando: `npm run build`. Esperado: `✓ Compiled successfully` (el archivo compila; `@tanstack/react-query` ya está instalado).
+- [ ] **Step 3: Commit.**
 ```bash
-npx vitest run --reporter=basic
-```
-Esperado: `No test files found` (aún no hay tests) y **exit 0** — confirma config válida.
-
-- [ ] **Step 7: Commit.**
-```bash
-git add vitest.config.ts vitest.setup.ts vitest.setup.ts lib/test/query-wrapper.tsx package.json package-lock.json
-git commit -m "chore(test): configurar Vitest + Testing Library para Next 16 / React 19"
+git add lib/test/query-wrapper.tsx
+git commit -m "test: utilidad createQueryWrapper para tests de hooks"
 ```
 
 ---
