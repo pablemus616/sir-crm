@@ -59,6 +59,30 @@ describe('createResourceHooks', () => {
     expect(spy).toHaveBeenCalledWith({ queryKey: hooks.keys.all })
   })
 
+  it('useOne devuelve el recurso por id y usa la clave de detalle', async () => {
+    const hooks = createResourceHooks<Sector>('sectors', client)
+    const { wrapper } = createQueryWrapper()
+    const { result } = renderHook(() => hooks.useOne(1), { wrapper })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toEqual({ id: 1, name: 'A' })
+    expect(client.one).toHaveBeenCalledWith(1)
+    expect(result.current.dataUpdatedAt).toBeGreaterThan(0) // confirma que vino de la query
+  })
+
+  it('useUpdate invalida listas Y detalle tras éxito (doble invalidación)', async () => {
+    const hooks = createResourceHooks<Sector>('sectors', client)
+    const { wrapper, client: qc } = createQueryWrapper()
+    const spy = vi.spyOn(qc, 'invalidateQueries')
+    const { result } = renderHook(() => hooks.useUpdate(), { wrapper })
+    await act(async () => {
+      await result.current.mutateAsync({ id: 42, dto: { name: 'Updated' } as Partial<Sector> })
+    })
+    expect(client.update).toHaveBeenCalledWith(42, { name: 'Updated' })
+    expect(spy).toHaveBeenCalledWith({ queryKey: hooks.keys.lists() })
+    expect(spy).toHaveBeenCalledWith({ queryKey: hooks.keys.detail(42) })
+    expect(spy).toHaveBeenCalledTimes(2)
+  })
+
   it('useAction ejecuta la subruta e invalida', async () => {
     const hooks = createResourceHooks<Sector>('sectors', client)
     const { wrapper, client: qc } = createQueryWrapper()
