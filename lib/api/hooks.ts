@@ -7,8 +7,25 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query'
 import { resourceKeys } from './query-keys'
-import type { ResourceClient, Id, HttpMethod } from './resource-client'
+import { createResourceClient, type ResourceClient, type Id, type HttpMethod } from './resource-client'
 import type { ListParams, Paginated } from './types'
+
+/**
+ * Generic useList hook for catalog fetches: useList('sectors', { limit: 200 }).
+ * Returns UseQueryResult<Paginated<T>> — callers read result.data?.items.
+ * Must be called only in client components (needs TanStack Query context).
+ */
+export function useList<T = { id: number; name: string }>(
+  resource: string,
+  params?: ListParams,
+): UseQueryResult<Paginated<T>, Error> {
+  const keys = resourceKeys(resource)
+  return useQuery<Paginated<T>, Error>({
+    queryKey: keys.list(params),
+    queryFn: () => createResourceClient<T>(resource).list(params),
+    placeholderData: (prev) => prev,
+  })
+}
 
 export interface ActionVars {
   id: Id
