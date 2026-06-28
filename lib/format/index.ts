@@ -13,6 +13,13 @@ const compactNumberFormatter = new Intl.NumberFormat(LOCALE, {
   notation: "compact",
 });
 
+const compactCurrencyFormatter = new Intl.NumberFormat(LOCALE, {
+  style: "currency",
+  currency: "GTQ",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 const dateFormatter = new Intl.DateTimeFormat(LOCALE, { dateStyle: "medium" });
 
 const dateTimeFormatter = new Intl.DateTimeFormat(LOCALE, {
@@ -43,6 +50,11 @@ export function formatPercent(value: number, fractionDigits = 0): string {
 
 export function formatCompactNumber(value: number): string {
   return compactNumberFormatter.format(value);
+}
+
+/** Compact Quetzales: 1_500_000 → "Q 1.5M", 8000 → "Q 8K" */
+export function formatCompactCurrency(value: number): string {
+  return compactCurrencyFormatter.format(value);
 }
 
 export function formatDuration(seconds: number): string {
