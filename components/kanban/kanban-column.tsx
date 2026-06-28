@@ -25,7 +25,7 @@ export function KanbanColumn({ stage, cards, onAction }: KanbanColumnProps) {
       role="region"
       aria-label={stage.name}
       className={[
-        'flex w-72 shrink-0 flex-col rounded-lg bg-muted/50 p-2 transition-shadow',
+        'flex w-full flex-col rounded-lg bg-muted/50 p-2 transition-shadow',
         isOver ? 'ring-2 ring-ring' : '',
       ].join(' ')}
     >

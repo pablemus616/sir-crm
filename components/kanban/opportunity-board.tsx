@@ -42,9 +42,9 @@ export function OpportunityBoard({ filters, onAction }: OpportunityBoardProps) {
   /* ── Loading state ─────────────────────────────────────────────────── */
   if (stagesQ.isLoading || oppsQ.isLoading) {
     return (
-      <div className="flex gap-3 overflow-x-auto pb-4" aria-busy="true" aria-label="Cargando tablero">
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-96 w-72 shrink-0 rounded-lg" />
+      <div className="grid grid-cols-1 gap-3 pb-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true" aria-label="Cargando tablero">
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <Skeleton key={i} className="h-72 w-full rounded-lg" />
         ))}
       </div>
     );
@@ -80,7 +80,7 @@ export function OpportunityBoard({ filters, onAction }: OpportunityBoardProps) {
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
       <div
-        className="flex gap-3 overflow-x-auto pb-4"
+        className="grid grid-cols-1 gap-3 pb-4 sm:grid-cols-2 lg:grid-cols-4"
         role="list"
         aria-label="Tablero de oportunidades"
       >
