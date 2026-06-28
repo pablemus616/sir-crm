@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { ResourceView } from '@/components/resource/resource-view';
-import { rolesResource } from '@/lib/resources/roles';
+import { ResourcePage } from '@/components/resource/resource-page';
 
 export const metadata: Metadata = { title: 'Roles · SIR CRM' };
 
 export default function RolesPage() {
-  return <ResourceView resource={rolesResource} />;
+  return <ResourcePage resourceKey="roles" />;
 }

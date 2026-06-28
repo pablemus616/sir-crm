@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { ResourceView } from '@/components/resource/resource-view';
-import { clientsResource } from '@/lib/resources/clients';
+import { ResourcePage } from '@/components/resource/resource-page';
 
 export const metadata: Metadata = { title: 'Clientes · SIR CRM' };
 
 export default function ClientsPage() {
-  return <ResourceView resource={clientsResource} />;
+  return <ResourcePage resourceKey="clients" />;
 }
