@@ -42,7 +42,7 @@ export function OpportunitiesView() {
         </TabsContent>
 
         <TabsContent value="tabla" className="mt-4">
-          <OpportunitiesTable onAction={openAction} />
+          <OpportunitiesTable />
         </TabsContent>
       </Tabs>
 

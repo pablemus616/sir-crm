@@ -185,3 +185,17 @@ export function useCreateOpportunity() {
     onError: () => toast.error('No se pudo crear la oportunidad'),
   });
 }
+
+export function useUpdateOpportunity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<CreateOpportunityInput> }) =>
+      clientFetch<Opportunity>(`opportunities/${id}`, { method: 'PATCH', body: data }),
+    onSuccess: () => {
+      toast.success('Oportunidad actualizada');
+      qc.invalidateQueries({ queryKey: OPP_KANBAN_KEY });
+      qc.invalidateQueries({ queryKey: ['opportunities'] });
+    },
+    onError: () => toast.error('No se pudo actualizar la oportunidad'),
+  });
+}
