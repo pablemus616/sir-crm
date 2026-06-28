@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const idField = z.coerce.number().int().positive();
 
-const emptyToUndefined = (v: unknown) =>
+export const emptyToUndefined = (v: unknown) =>
   v === '' || v === null || v === undefined ? undefined : v;
 
 /** Optional ID field: empty string / null / undefined → undefined; otherwise coerced to positive int. */
