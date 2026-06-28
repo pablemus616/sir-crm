@@ -152,14 +152,18 @@ export function ContactHistoryView() {
               className="rounded-md border border-border bg-card p-4"
             >
               <div className="flex items-center gap-2">
-                <p className="truncate text-sm font-medium text-foreground">
+                <p className="min-w-0 truncate text-sm font-medium text-foreground">
                   {h.contact?.name ?? `Contacto #${h.contactId}`}
                 </p>
                 {h.contactType?.name && (
-                  <Badge variant="secondary">{h.contactType.name}</Badge>
+                  <Badge variant="secondary" className="shrink-0">
+                    {h.contactType.name}
+                  </Badge>
                 )}
                 {h.direction && (
-                  <Badge variant="outline">{contactDirectionLabels[h.direction]}</Badge>
+                  <Badge variant="outline" className="shrink-0">
+                    {contactDirectionLabels[h.direction]}
+                  </Badge>
                 )}
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">

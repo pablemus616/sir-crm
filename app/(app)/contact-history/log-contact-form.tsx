@@ -56,7 +56,9 @@ export function LogContactForm({
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="contactId">Contacto</Label>
+            <Label htmlFor="contactId">
+              Contacto <span className="text-destructive">*</span>
+            </Label>
             <select id="contactId" className={selectClass} {...register('contactId')}>
               <option value="">Selecciona…</option>
               {contacts.data?.items.map((c) => (
@@ -69,7 +71,9 @@ export function LogContactForm({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="contactType">Tipo de contacto</Label>
+            <Label htmlFor="contactType">
+              Tipo de contacto <span className="text-destructive">*</span>
+            </Label>
             <select id="contactType" className={selectClass} {...register('contactType')}>
               <option value="">Selecciona…</option>
               {contactTypes.data?.items.map((t) => (
@@ -84,7 +88,9 @@ export function LogContactForm({
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="contactTime">Fecha y hora</Label>
+            <Label htmlFor="contactTime">
+              Fecha y hora <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="contactTime"
               type="datetime-local"
@@ -103,7 +109,11 @@ export function LogContactForm({
 
           <div className="space-y-1">
             <Label htmlFor="direction">Dirección (opcional)</Label>
-            <select id="direction" className={selectClass} {...register('direction')}>
+            <select
+              id="direction"
+              className={selectClass}
+              {...register('direction', { setValueAs: (v) => (v === '' ? undefined : v) })}
+            >
               <option value="">Sin especificar</option>
               {(Object.keys(contactDirectionLabels) as ContactDirection[]).map((d) => (
                 <option key={d} value={d}>
@@ -126,12 +136,21 @@ export function LogContactForm({
 
           <div className="space-y-1">
             <Label htmlFor="phoneNumberDialed">Teléfono marcado (opcional)</Label>
-            <Input id="phoneNumberDialed" {...register('phoneNumberDialed')} />
+            <Input
+              id="phoneNumberDialed"
+              {...register('phoneNumberDialed', {
+                setValueAs: (v) => (v?.trim() ? v : undefined),
+              })}
+            />
           </div>
 
           <div className="space-y-1">
             <Label htmlFor="contactDesc">Descripción (opcional)</Label>
-            <Textarea id="contactDesc" rows={3} {...register('contactDesc')} />
+            <Textarea
+              id="contactDesc"
+              rows={3}
+              {...register('contactDesc', { setValueAs: (v) => (v?.trim() ? v : undefined) })}
+            />
           </div>
 
           <DialogFooter>
