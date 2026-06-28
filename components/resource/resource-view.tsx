@@ -18,6 +18,7 @@ import {
 import { ResourceTable } from "./resource-table";
 import { ResourceForm } from "./resource-form";
 import { ResourceDetail } from "./resource-detail";
+import { ResourceFilters } from "./resource-filters";
 import type { ResourceDescriptor } from "@/lib/resources/types";
 import type { ListParams } from "@/lib/api/types";
 
@@ -32,6 +33,7 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [filterValues, setFilterValues] = useState<Record<string, string | number | boolean>>({});
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<T | null>(null);
   const [detailRow, setDetailRow] = useState<T | null>(null);
@@ -43,11 +45,27 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
     params.sort = sorting[0].id;
     params.order = sorting[0].desc ? "desc" : "asc";
   }
+  for (const [k, v] of Object.entries(filterValues)) {
+    params[k] = v;
+  }
 
   const list = hooks.useList(params);
   const create = hooks.useCreate();
   const update = hooks.useUpdate();
   const remove = hooks.useRemove();
+
+  function handleFilterChange(key: string, value: string | number | boolean | undefined) {
+    setPage(1);
+    setFilterValues((prev) => {
+      const next = { ...prev };
+      if (value === undefined || value === false) {
+        delete next[key];
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
+  }
 
   function openCreate() {
     setEditing(null);
@@ -86,6 +104,14 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
         <h1 className="font-display text-2xl text-foreground">{config.label}</h1>
         <Button onClick={openCreate}>Nuevo</Button>
       </div>
+
+      {config.filters && config.filters.length > 0 && (
+        <ResourceFilters
+          filters={config.filters}
+          values={filterValues}
+          onChange={handleFilterChange}
+        />
+      )}
 
       <ResourceTable<T>
         columns={config.columns}
