@@ -49,6 +49,9 @@ export function RolePermissionsEditor({ roleId }: { roleId: number }) {
   const assignedIds = new Set(assigned.map((p) => p.id));
   const available = (permissions.data?.items ?? []).filter((p) => !assignedIds.has(p.id));
 
+  const permissionItems: Record<string, string> = {};
+  for (const p of available) permissionItems[String(p.id)] = p.name;
+
   const handleAssign = () => {
     if (!selected) return;
     assign.mutate(
@@ -83,7 +86,11 @@ export function RolePermissionsEditor({ roleId }: { roleId: number }) {
       )}
 
       <div className="flex items-center gap-2">
-        <Select value={selected} onValueChange={(v) => setSelected(v ?? '')}>
+        <Select
+          items={permissionItems}
+          value={selected}
+          onValueChange={(v) => setSelected(v ?? '')}
+        >
           <SelectTrigger className="w-full" aria-label="Agregar permiso">
             <SelectValue placeholder="Agregar permiso…" />
           </SelectTrigger>

@@ -54,6 +54,14 @@ export function CreateApplicationDialog() {
       },
     });
 
+  const candidateItems: Record<string, string> = {};
+  for (const c of candidates.data?.items ?? [])
+    candidateItems[String(c.id)] = `${c.firstName} ${c.lastName}`;
+
+  const opportunityItems: Record<string, string> = {};
+  for (const o of opportunities.data?.items ?? [])
+    opportunityItems[String(o.id)] = String(o.title ?? `Oportunidad #${o.id}`);
+
   return (
     <>
       <Button onClick={() => setOpen(true)}>Nueva aplicación</Button>
@@ -74,6 +82,7 @@ export function CreateApplicationDialog() {
                     <FormLabel>Candidato</FormLabel>
                     <FormControl>
                       <Select
+                        items={candidateItems}
                         value={field.value != null ? String(field.value) : ''}
                         onValueChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
@@ -104,6 +113,7 @@ export function CreateApplicationDialog() {
                     <FormLabel>Oportunidad</FormLabel>
                     <FormControl>
                       <Select
+                        items={opportunityItems}
                         value={field.value != null ? String(field.value) : ''}
                         onValueChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))

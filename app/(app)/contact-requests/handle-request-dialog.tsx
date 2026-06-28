@@ -56,6 +56,9 @@ export function HandleRequestDialog({
   const total = clients.data?.total ?? 0;
   const truncated = total > items.length;
 
+  const clientItems: Record<string, string> = {};
+  for (const c of items) clientItems[String(c.id)] = c.name;
+
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
@@ -73,6 +76,7 @@ export function HandleRequestDialog({
         <div className="space-y-1">
           <Label htmlFor="clientId">Cliente resultante (opcional)</Label>
           <Select
+            items={clientItems}
             value={clientId}
             onValueChange={(v) => setClientId(v === NONE ? '' : (v ?? ''))}
           >

@@ -26,8 +26,15 @@ export function FilterSelect({
   options: FilterOption[];
   onChange: (value: string | undefined) => void;
 }) {
+  // Base UI muestra el VALOR crudo en el trigger salvo que se le pase `items`
+  // (mapa value→label) al Root; sin esto el trigger mostraba '__all__'/ids.
+  const allLabel = `${placeholder}: todos`;
+  const items: Record<string, string> = { [ALL]: allLabel };
+  for (const o of options) items[o.value] = o.label;
+
   return (
     <Select
+      items={items}
       value={value === undefined ? ALL : String(value)}
       onValueChange={(v) => onChange(v == null || v === ALL ? undefined : v)}
     >
@@ -35,7 +42,7 @@ export function FilterSelect({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ALL}>{placeholder}: todos</SelectItem>
+        <SelectItem value={ALL}>{allLabel}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}

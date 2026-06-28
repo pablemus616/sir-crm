@@ -93,6 +93,10 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
     }
   };
 
+  const employeeItems: Record<string, string> = {};
+  for (const e of employees.data?.items ?? [])
+    employeeItems[String(e.id)] = `${e.firstName} ${e.lastName}`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -170,6 +174,7 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
                   </FormLabel>
                   <FormControl>
                     <Select
+                      items={employeeItems}
                       value={field.value != null ? String(field.value) : ''}
                       onValueChange={(v) =>
                         field.onChange(v == null ? undefined : Number(v))

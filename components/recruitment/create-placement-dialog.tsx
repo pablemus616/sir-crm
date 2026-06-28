@@ -63,6 +63,19 @@ export function CreatePlacementDialog() {
       },
     });
 
+  const applicationItems: Record<string, string> = {};
+  for (const a of (applications.data?.items ?? []).filter(
+    (a) => a.stage !== 'rejected' && a.stage !== 'withdrawn',
+  ))
+    applicationItems[String(a.id)] = `${a.candidate?.firstName ?? 'Candidato'} ${
+      a.candidate?.lastName ?? `#${a.candidateId}`
+    } — ${
+      a.opportunity?.title ?? `Oportunidad #${a.opportunityId}`
+    } (${applicationStageLabels[a.stage]})`;
+
+  const statusItems: Record<string, string> = {};
+  for (const s of PLACEMENT_STATUSES) statusItems[s] = placementStatusLabels[s];
+
   return (
     <>
       <Button onClick={() => setOpen(true)}>Nuevo placement</Button>
@@ -85,6 +98,7 @@ export function CreatePlacementDialog() {
                     </FormLabel>
                     <FormControl>
                       <Select
+                        items={applicationItems}
                         value={field.value != null ? String(field.value) : ''}
                         onValueChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
@@ -265,6 +279,7 @@ export function CreatePlacementDialog() {
                     <FormLabel>Estado</FormLabel>
                     <FormControl>
                       <Select
+                        items={statusItems}
                         value={field.value ?? ''}
                         onValueChange={(v) =>
                           field.onChange(

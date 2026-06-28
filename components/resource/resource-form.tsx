@@ -61,9 +61,15 @@ function DynamicSelectField({
     value: String(getValue(item)),
   }));
 
+  // Base UI necesita `items` (value→label) en el Root para mostrar el label en el
+  // trigger cuando está cerrado; sin esto el trigger mostraba el id.
+  const items: Record<string, string> = {};
+  for (const opt of options) items[opt.value] = String(opt.label);
+
   const id = field.name;
   return (
     <Select
+      items={items}
       value={rhf.value != null ? String(rhf.value) : ""}
       onValueChange={(value) => rhf.onChange(value)}
     >
@@ -207,9 +213,12 @@ function renderControl(field: FieldConfig, rhf: RhfField) {
           onCheckedChange={(checked) => rhf.onChange(checked)}
         />
       );
-    case "select":
+    case "select": {
+      const selectItems: Record<string, string> = {};
+      for (const opt of field.options ?? []) selectItems[String(opt.value)] = String(opt.label);
       return (
         <Select
+          items={selectItems}
           value={rhf.value != null ? String(rhf.value) : ""}
           onValueChange={(value) => rhf.onChange(value)}
         >
@@ -225,6 +234,7 @@ function renderControl(field: FieldConfig, rhf: RhfField) {
           </SelectContent>
         </Select>
       );
+    }
     case "date":
       return (
         <Input

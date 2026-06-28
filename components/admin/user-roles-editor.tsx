@@ -48,6 +48,9 @@ export function UserRolesEditor({ userId }: { userId: number }) {
   const assignedIds = new Set(assigned.map((r) => r.id));
   const available = (roles.data?.items ?? []).filter((r) => !assignedIds.has(r.id));
 
+  const roleItems: Record<string, string> = {};
+  for (const r of available) roleItems[String(r.id)] = r.name;
+
   const handleAssign = () => {
     if (!selected) return;
     assign.mutate(
@@ -82,7 +85,11 @@ export function UserRolesEditor({ userId }: { userId: number }) {
       )}
 
       <div className="flex items-center gap-2">
-        <Select value={selected} onValueChange={(v) => setSelected(v ?? '')}>
+        <Select
+          items={roleItems}
+          value={selected}
+          onValueChange={(v) => setSelected(v ?? '')}
+        >
           <SelectTrigger className="w-full" aria-label="Agregar rol">
             <SelectValue placeholder="Agregar rol…" />
           </SelectTrigger>
