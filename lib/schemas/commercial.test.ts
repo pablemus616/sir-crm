@@ -130,3 +130,89 @@ describe('optional numeric fields — empty string → undefined (not 0)', () =>
     ).toThrow();
   });
 });
+
+describe('optional string/email fields — null (edit) / "" (create) → undefined', () => {
+  it('createClientSchema: GET row con sector=null → undefined (edit round-trip)', () => {
+    const r = createClientSchema.parse({ name: 'ACME', sector: null });
+    expect(r.sector).toBeUndefined();
+  });
+
+  it('createClientSchema: sector con valor real se conserva', () => {
+    const r = createClientSchema.parse({ name: 'ACME', sector: 'Tecnología' });
+    expect(r.sector).toBe('Tecnología');
+  });
+
+  it('createClientContactSchema: GET row con phoneNumber/email=null → undefined', () => {
+    const r = createClientContactSchema.parse({
+      name: 'Ana',
+      clientId: 1,
+      phoneNumber: null,
+      email: null,
+    });
+    expect(r.phoneNumber).toBeUndefined();
+    expect(r.email).toBeUndefined();
+  });
+
+  it('createClientContactSchema: email="" → undefined (no "") en el POST', () => {
+    const r = createClientContactSchema.parse({
+      name: 'Ana',
+      clientId: 1,
+      email: '',
+    });
+    expect(r.email).toBeUndefined();
+  });
+
+  it('createClientContactSchema: email válido se conserva', () => {
+    const r = createClientContactSchema.parse({
+      name: 'Ana',
+      clientId: 1,
+      email: 'ana@example.com',
+    });
+    expect(r.email).toBe('ana@example.com');
+  });
+
+  it('createOpportunitySchema: GET row con title/currency/source=null → undefined', () => {
+    const r = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      title: null,
+      currency: null,
+      source: null,
+    });
+    expect(r.title).toBeUndefined();
+    expect(r.currency).toBeUndefined();
+    expect(r.source).toBeUndefined();
+  });
+
+  it('createOpportunitySchema: title="" → undefined (omitido en create)', () => {
+    const r = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      title: '',
+    });
+    expect(r.title).toBeUndefined();
+  });
+
+  it('createOpportunitySchema: title solo espacios → rechazado (min(1) tras trim)', () => {
+    expect(() =>
+      createOpportunitySchema.parse({
+        clientId: 1,
+        responsibleEmployeeId: 1,
+        pipelineStageId: 1,
+        title: '   ',
+      }),
+    ).toThrow();
+  });
+
+  it('createOpportunitySchema: title real se conserva', () => {
+    const r = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      title: 'Backend Senior',
+    });
+    expect(r.title).toBe('Backend Senior');
+  });
+});

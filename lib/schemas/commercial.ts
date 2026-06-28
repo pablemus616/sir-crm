@@ -14,6 +14,24 @@ export const optionalId = z.preprocess(
 /** Optional numeric field: empty string / null / undefined → undefined; otherwise coerced to number. */
 export const optionalNumber = z.preprocess(emptyToUndefined, z.coerce.number().optional());
 
+/**
+ * Optional free-text field. GET rows return `null` for unset nullable columns
+ * and create forms submit '' for blanks; a bare `.optional()` rejects both
+ * ("Expected string, received null"). Preprocess '' / null / undefined →
+ * undefined so create omits the key and edit round-trips a null row.
+ */
+export const optionalText = z.preprocess(emptyToUndefined, z.string().trim().optional());
+
+/**
+ * Optional email field. Same null/'' tolerance as optionalText, but a provided
+ * value must be a valid email. Collapsing '' → undefined also keeps the POST
+ * body clean (backend `@IsOptional() @IsEmail()` rejects an empty string).
+ */
+export const optionalEmail = z.preprocess(
+  emptyToUndefined,
+  z.string().email('Correo inválido').optional(),
+);
+
 export const createOpportunitySchema = z.object({
   clientId: idField,
   responsibleEmployeeId: idField,
@@ -21,12 +39,12 @@ export const createOpportunitySchema = z.object({
   areaId: optionalId,
   clientContactId: optionalId,
   originContactRequestId: optionalId,
-  title: z.string().trim().min(1).optional(),
+  title: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   seniority: z.enum(['junior', 'mid', 'senior', 'lead']).optional(),
   headcount: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).optional()),
   amount: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
-  currency: z.string().trim().optional(),
-  source: z.string().trim().optional(),
+  currency: optionalText,
+  source: optionalText,
   expectedCloseDate: z.string().date().optional(),
 });
 export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;
@@ -37,7 +55,7 @@ export const changeStageSchema = z.object({
     emptyToUndefined,
     z.coerce.number().int().min(0).max(100).optional(),
   ),
-  lostReason: z.string().trim().optional(),
+  lostReason: optionalText,
 });
 export type ChangeStageInput = z.infer<typeof changeStageSchema>;
 
@@ -52,13 +70,13 @@ export const followUpSchema = z.object({
 export type FollowUpInput = z.infer<typeof followUpSchema>;
 
 export const loseOpportunitySchema = z.object({
-  lostReason: z.string().trim().optional(),
+  lostReason: optionalText,
 });
 export type LoseOpportunityInput = z.infer<typeof loseOpportunitySchema>;
 
 export const createClientSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  sector: z.string().trim().optional(),
+  sector: optionalText,
   sectorId: optionalId,
   employeeSize: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).optional()),
 });
@@ -66,8 +84,8 @@ export type CreateClientInput = z.infer<typeof createClientSchema>;
 
 export const createClientContactSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
-  phoneNumber: z.string().trim().optional(),
-  email: z.string().email('Correo inválido').optional().or(z.literal('')),
+  phoneNumber: optionalText,
+  email: optionalEmail,
   clientId: idField,
 });
 export type CreateClientContactInput = z.infer<typeof createClientContactSchema>;
@@ -82,8 +100,8 @@ export const createContactHistorySchema = z.object({
   contactType: idField,
   contactTime: z.string().datetime(),
   callLength: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).optional()),
-  contactDesc: z.string().trim().optional(),
-  phoneNumberDialed: z.string().trim().optional(),
+  contactDesc: optionalText,
+  phoneNumberDialed: optionalText,
   direction: z.enum(['inbound', 'outbound']).optional(),
   opportunityId: optionalId,
 });

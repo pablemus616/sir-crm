@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { optionalId, emptyToUndefined } from '@/lib/schemas/commercial';
+import {
+  optionalId,
+  emptyToUndefined,
+  optionalText,
+  optionalEmail,
+} from '@/lib/schemas/commercial';
 import {
   CANDIDATE_STATUSES,
   APPLICATION_STAGES,
@@ -38,18 +43,18 @@ const optionalDate = z.preprocess(emptyToUndefined, z.string().date().optional()
 
 export const createCandidateSchema = z.object({
   firstName: z.string().trim().min(1, 'El nombre es obligatorio'),
-  secondName: z.string().trim().optional(),
+  secondName: optionalText,
   lastName: z.string().trim().min(1, 'El apellido es obligatorio'),
-  surName: z.string().trim().optional(),
-  nationalId: z.string().trim().optional(),
-  phoneNumber: z.string().trim().optional(),
-  email: z.string().email('Correo inválido').optional().or(z.literal('')),
+  surName: optionalText,
+  nationalId: optionalText,
+  phoneNumber: optionalText,
+  email: optionalEmail,
   birthDate: optionalDate,
-  headline: z.string().trim().optional(),
-  source: z.string().trim().optional(),
+  headline: optionalText,
+  source: optionalText,
   expectedSalary: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   status: optionalEnum(CANDIDATE_STATUSES),
-  notes: z.string().trim().optional(),
+  notes: optionalText,
 });
 export type CreateCandidateInput = z.infer<typeof createCandidateSchema>;
 
@@ -65,8 +70,8 @@ export const createApplicationSchema = z.object({
   opportunityId: idField,
   referredByEmployeeId: optionalId,
   stage: optionalEnum(APPLICATION_STAGES),
-  source: z.string().trim().optional(),
-  notes: z.string().trim().optional(),
+  source: optionalText,
+  notes: optionalText,
 });
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
 
@@ -84,7 +89,7 @@ export const createPlacementSchema = z.object({
   placementDate: z.string().date(),
   startDate: optionalDate,
   endDate: optionalDate,
-  endReason: z.string().trim().optional(),
+  endReason: optionalText,
   agreedSalary: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   fee: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   status: optionalEnum(PLACEMENT_STATUSES),

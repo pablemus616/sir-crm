@@ -90,6 +90,48 @@ describe('createCandidateSchema', () => {
   it('updateCandidateSchema es totalmente parcial (objeto vacío válido)', () => {
     expect(() => updateCandidateSchema.parse({})).not.toThrow();
   });
+
+  it('GET row con strings opcionales=null → undefined (edit round-trip)', () => {
+    const r = createCandidateSchema.parse({
+      firstName: 'Ana',
+      lastName: 'García',
+      secondName: null,
+      surName: null,
+      nationalId: null,
+      phoneNumber: null,
+      headline: null,
+      source: null,
+      notes: null,
+      email: null,
+    });
+    expect(r.secondName).toBeUndefined();
+    expect(r.surName).toBeUndefined();
+    expect(r.nationalId).toBeUndefined();
+    expect(r.phoneNumber).toBeUndefined();
+    expect(r.headline).toBeUndefined();
+    expect(r.source).toBeUndefined();
+    expect(r.notes).toBeUndefined();
+    expect(r.email).toBeUndefined();
+  });
+
+  it('email="" → undefined (no "") en el POST', () => {
+    const r = createCandidateSchema.parse({
+      firstName: 'Ana',
+      lastName: 'García',
+      email: '',
+    });
+    expect(r.email).toBeUndefined();
+  });
+
+  it('rechaza email inválido', () => {
+    expect(() =>
+      createCandidateSchema.parse({
+        firstName: 'Ana',
+        lastName: 'García',
+        email: 'no-es-correo',
+      }),
+    ).toThrow();
+  });
 });
 
 describe('createApplicationSchema', () => {
