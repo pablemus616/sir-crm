@@ -2,17 +2,29 @@ import { z } from 'zod';
 
 const idField = z.coerce.number().int().positive();
 
+const emptyToUndefined = (v: unknown) =>
+  v === '' || v === null || v === undefined ? undefined : v;
+
+/** Optional ID field: empty string / null / undefined → undefined; otherwise coerced to positive int. */
+export const optionalId = z.preprocess(
+  emptyToUndefined,
+  z.coerce.number().int().positive().optional(),
+);
+
+/** Optional numeric field: empty string / null / undefined → undefined; otherwise coerced to number. */
+export const optionalNumber = z.preprocess(emptyToUndefined, z.coerce.number().optional());
+
 export const createOpportunitySchema = z.object({
   clientId: idField,
   responsibleEmployeeId: idField,
   pipelineStageId: idField,
-  areaId: idField.optional(),
-  clientContactId: idField.optional(),
-  originContactRequestId: idField.optional(),
+  areaId: optionalId,
+  clientContactId: optionalId,
+  originContactRequestId: optionalId,
   title: z.string().trim().min(1).optional(),
   seniority: z.enum(['junior', 'mid', 'senior', 'lead']).optional(),
-  headcount: z.coerce.number().int().min(1).optional(),
-  amount: z.coerce.number().min(0).optional(),
+  headcount: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).optional()),
+  amount: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   currency: z.string().trim().optional(),
   source: z.string().trim().optional(),
   expectedCloseDate: z.string().date().optional(),
@@ -21,13 +33,16 @@ export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;
 
 export const changeStageSchema = z.object({
   pipelineStageId: idField,
-  probability: z.coerce.number().int().min(0).max(100).optional(),
+  probability: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().min(0).max(100).optional(),
+  ),
   lostReason: z.string().trim().optional(),
 });
 export type ChangeStageInput = z.infer<typeof changeStageSchema>;
 
 export const sendProposalSchema = z.object({
-  amount: z.coerce.number().min(0).optional(),
+  amount: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
 });
 export type SendProposalInput = z.infer<typeof sendProposalSchema>;
 
@@ -44,8 +59,8 @@ export type LoseOpportunityInput = z.infer<typeof loseOpportunitySchema>;
 export const createClientSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   sector: z.string().trim().optional(),
-  sectorId: z.coerce.number().int().optional(),
-  employeeSize: z.coerce.number().int().min(0).optional(),
+  sectorId: optionalId,
+  employeeSize: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).optional()),
 });
 export type CreateClientInput = z.infer<typeof createClientSchema>;
 
@@ -58,7 +73,7 @@ export const createClientContactSchema = z.object({
 export type CreateClientContactInput = z.infer<typeof createClientContactSchema>;
 
 export const handleContactRequestSchema = z.object({
-  resultingClientId: z.coerce.number().int().positive().optional(),
+  resultingClientId: optionalId,
 });
 export type HandleContactRequestInput = z.infer<typeof handleContactRequestSchema>;
 
@@ -66,10 +81,10 @@ export const createContactHistorySchema = z.object({
   contactId: idField,
   contactType: idField,
   contactTime: z.string().datetime(),
-  callLength: z.coerce.number().int().min(0).optional(),
+  callLength: z.preprocess(emptyToUndefined, z.coerce.number().int().min(0).optional()),
   contactDesc: z.string().trim().optional(),
   phoneNumberDialed: z.string().trim().optional(),
   direction: z.enum(['inbound', 'outbound']).optional(),
-  opportunityId: z.coerce.number().int().positive().optional(),
+  opportunityId: optionalId,
 });
 export type CreateContactHistoryInput = z.infer<typeof createContactHistorySchema>;

@@ -4,6 +4,8 @@ import {
   changeStageSchema,
   createClientContactSchema,
   createContactHistorySchema,
+  createClientSchema,
+  handleContactRequestSchema,
 } from './commercial';
 
 describe('createOpportunitySchema', () => {
@@ -67,6 +69,63 @@ describe('createContactHistorySchema', () => {
         contactType: 1,
         contactTime: '2026-06-27T10:00:00Z',
         direction: 'invalid-dir',
+      }),
+    ).toThrow();
+  });
+});
+
+describe('optional numeric fields — empty string → undefined (not 0)', () => {
+  it('createClientSchema: sectorId vacío → undefined', () => {
+    const r = createClientSchema.parse({ name: 'ACME', sectorId: '' });
+    expect(r.sectorId).toBeUndefined();
+  });
+
+  it('createClientSchema: sectorId "7" → 7', () => {
+    const r = createClientSchema.parse({ name: 'ACME', sectorId: '7' });
+    expect(r.sectorId).toBe(7);
+  });
+
+  it('createClientSchema: employeeSize vacío → undefined', () => {
+    const r = createClientSchema.parse({ name: 'ACME', employeeSize: '' });
+    expect(r.employeeSize).toBeUndefined();
+  });
+
+  it('createOpportunitySchema: areaId vacío → undefined', () => {
+    const r = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      areaId: '',
+    });
+    expect(r.areaId).toBeUndefined();
+  });
+
+  it('createOpportunitySchema: amount vacío → undefined', () => {
+    const r = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      amount: '',
+    });
+    expect(r.amount).toBeUndefined();
+  });
+
+  it('handleContactRequestSchema: resultingClientId vacío → undefined', () => {
+    const r = handleContactRequestSchema.parse({ resultingClientId: '' });
+    expect(r.resultingClientId).toBeUndefined();
+  });
+
+  it('handleContactRequestSchema: resultingClientId "42" → 42', () => {
+    const r = handleContactRequestSchema.parse({ resultingClientId: '42' });
+    expect(r.resultingClientId).toBe(42);
+  });
+
+  it('createOpportunitySchema: required clientId rejects blank', () => {
+    expect(() =>
+      createOpportunitySchema.parse({
+        clientId: '',
+        responsibleEmployeeId: 1,
+        pipelineStageId: 1,
       }),
     ).toThrow();
   });
