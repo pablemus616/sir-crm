@@ -32,6 +32,9 @@ export const optionalEmail = z.preprocess(
   z.string().email('Correo inválido').optional(),
 );
 
+/** Optional date (YYYY-MM-DD): '' / null / undefined → undefined; a provided value must be a valid date. */
+export const optionalDate = z.preprocess(emptyToUndefined, z.string().date().optional());
+
 export const createOpportunitySchema = z.object({
   clientId: idField,
   responsibleEmployeeId: idField,
@@ -45,7 +48,7 @@ export const createOpportunitySchema = z.object({
   amount: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   currency: optionalText,
   source: optionalText,
-  expectedCloseDate: z.string().date().optional(),
+  expectedCloseDate: optionalDate,
 });
 export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;
 

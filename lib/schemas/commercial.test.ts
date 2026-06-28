@@ -110,6 +110,23 @@ describe('optional numeric fields — empty string → undefined (not 0)', () =>
     expect(r.amount).toBeUndefined();
   });
 
+  it('createOpportunitySchema: expectedCloseDate ""/null → undefined (fecha opcional)', () => {
+    const empty = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      expectedCloseDate: '',
+    });
+    expect(empty.expectedCloseDate).toBeUndefined();
+    const nulled = createOpportunitySchema.parse({
+      clientId: 1,
+      responsibleEmployeeId: 1,
+      pipelineStageId: 1,
+      expectedCloseDate: null,
+    });
+    expect(nulled.expectedCloseDate).toBeUndefined();
+  });
+
   it('handleContactRequestSchema: resultingClientId vacío → undefined', () => {
     const r = handleContactRequestSchema.parse({ resultingClientId: '' });
     expect(r.resultingClientId).toBeUndefined();
