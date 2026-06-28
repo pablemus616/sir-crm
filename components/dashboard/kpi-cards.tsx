@@ -28,7 +28,7 @@ export function KpiCards() {
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
       {isPending || !data
         ? Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-4">
+            <Card key={i} className="p-4" data-testid={i === 0 ? 'kpi-cards-skeleton' : undefined}>
               <Skeleton className="mb-2 h-3 w-24" />
               <Skeleton className="h-8 w-full" />
             </Card>
