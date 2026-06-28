@@ -41,6 +41,11 @@ import {
   applicationStageLabels,
 } from '@/lib/domain/recruitment-labels';
 
+/** Centinela para el item "Sin estado": base-ui Select nunca emite '' al
+ *  seleccionar, así que mapeamos esta opción a undefined para volver al default
+ *  del servidor. */
+const NO_STATUS = '__none__';
+
 export function CreatePlacementDialog() {
   const [open, setOpen] = useState(false);
   const create = useCreatePlacement();
@@ -75,7 +80,9 @@ export function CreatePlacementDialog() {
                 name="applicationId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Aplicación</FormLabel>
+                    <FormLabel>
+                      Aplicación <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Select
                         value={field.value != null ? String(field.value) : ''}
@@ -83,11 +90,17 @@ export function CreatePlacementDialog() {
                           field.onChange(v == null ? undefined : Number(v))
                         }
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full" aria-required>
                           <SelectValue placeholder="Selecciona una aplicación" />
                         </SelectTrigger>
                         <SelectContent>
-                          {applications.data?.items.map((a) => (
+                          {applications.data?.items
+                            .filter(
+                              (a) =>
+                                a.stage !== 'rejected' &&
+                                a.stage !== 'withdrawn',
+                            )
+                            .map((a) => (
                             <SelectItem key={a.id} value={String(a.id)}>
                               {`${a.candidate?.firstName ?? 'Candidato'} ${
                                 a.candidate?.lastName ?? `#${a.candidateId}`
@@ -113,10 +126,14 @@ export function CreatePlacementDialog() {
                 name="placementDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fecha de colocación</FormLabel>
+                    <FormLabel>
+                      Fecha de colocación{' '}
+                      <span className="text-destructive">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="date"
+                        aria-required
                         value={field.value ?? ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
@@ -250,13 +267,16 @@ export function CreatePlacementDialog() {
                       <Select
                         value={field.value ?? ''}
                         onValueChange={(v) =>
-                          field.onChange(v == null ? undefined : v)
+                          field.onChange(
+                            v == null || v === NO_STATUS ? undefined : v,
+                          )
                         }
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Selecciona un estado" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value={NO_STATUS}>Sin estado</SelectItem>
                           {PLACEMENT_STATUSES.map((s) => (
                             <SelectItem key={s} value={s}>
                               {placementStatusLabels[s]}

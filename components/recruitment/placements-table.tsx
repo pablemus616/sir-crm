@@ -81,8 +81,17 @@ export function PlacementsTable({ filters }: { filters: PlacementFilters }) {
             items.map((p) => (
               <TableRow
                 key={p.id}
-                className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+                aria-label={`Ver detalle de ${candidateName(p)}`}
+                className="cursor-pointer focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 onClick={() => setDetail(p)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setDetail(p);
+                  }
+                }}
               >
                 <TableCell className="font-medium text-foreground">
                   {candidateName(p)}
