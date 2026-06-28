@@ -18,6 +18,13 @@ function optionalEnum<T extends readonly [string, ...string[]]>(values: T) {
   return z.preprocess(emptyToUndefined, z.enum(values).optional());
 }
 
+/**
+ * Optional date (YYYY-MM-DD): a native <input type="date"> left blank submits
+ * '' which a bare `.date().optional()` would REJECT (same shape as the optional
+ * enum lesson). Preprocess '' / null / undefined → undefined first.
+ */
+const optionalDate = z.preprocess(emptyToUndefined, z.string().date().optional());
+
 /* ------------------------------------------------------------------ */
 /* Candidates                                                          */
 /* ------------------------------------------------------------------ */
@@ -30,7 +37,7 @@ export const createCandidateSchema = z.object({
   nationalId: z.string().trim().optional(),
   phoneNumber: z.string().trim().optional(),
   email: z.string().email('Correo inválido').optional().or(z.literal('')),
-  birthDate: z.string().date().optional(),
+  birthDate: optionalDate,
   headline: z.string().trim().optional(),
   source: z.string().trim().optional(),
   expectedSalary: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
@@ -68,8 +75,8 @@ export type ChangeApplicationStageInput = z.infer<typeof changeApplicationStageS
 export const createPlacementSchema = z.object({
   applicationId: idField,
   placementDate: z.string().date(),
-  startDate: z.string().date().optional(),
-  endDate: z.string().date().optional(),
+  startDate: optionalDate,
+  endDate: optionalDate,
   endReason: z.string().trim().optional(),
   agreedSalary: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
   fee: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),

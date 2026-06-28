@@ -78,6 +78,15 @@ describe('createCandidateSchema', () => {
     ).toThrow();
   });
 
+  it('birthDate "" → undefined (fecha opcional no debe romper, igual que enums)', () => {
+    const r = createCandidateSchema.parse({
+      firstName: 'Ana',
+      lastName: 'García',
+      birthDate: '',
+    });
+    expect(r.birthDate).toBeUndefined();
+  });
+
   it('updateCandidateSchema es totalmente parcial (objeto vacío válido)', () => {
     expect(() => updateCandidateSchema.parse({})).not.toThrow();
   });
@@ -178,6 +187,17 @@ describe('createPlacementSchema', () => {
       status: '',
     });
     expect(r.status).toBeUndefined();
+  });
+
+  it('startDate/endDate "" → undefined (fechas opcionales no deben romper el form)', () => {
+    const r = createPlacementSchema.parse({
+      applicationId: 4,
+      placementDate: '2026-06-01',
+      startDate: '',
+      endDate: '',
+    });
+    expect(r.startDate).toBeUndefined();
+    expect(r.endDate).toBeUndefined();
   });
 
   it('rechaza fee negativo', () => {
