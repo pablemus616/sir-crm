@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical } from 'lucide-react';
 import { formatGTQ, formatDate } from '@/lib/format';
+import { opportunityStatusLabels, opportunityStatusBadge } from '@/lib/domain/commercial-labels';
 import type { Opportunity } from '@/lib/api/types/commercial';
 
 export type CardAction = 'win' | 'lose' | 'proposal' | 'follow-up';
@@ -31,7 +32,7 @@ export function OpportunityCard({ opp, onAction, isOverlay = false }: Opportunit
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: opp.id });
+  } = useSortable({ id: opp.id, data: { stageId: opp.pipelineStageId } });
 
   const style = isOverlay
     ? { opacity: 1 }
@@ -91,6 +92,9 @@ export function OpportunityCard({ opp, onAction, isOverlay = false }: Opportunit
       </div>
 
       <div className="flex flex-wrap gap-1">
+        <Badge variant={opportunityStatusBadge(opp.status)}>
+          {opportunityStatusLabels[opp.status]}
+        </Badge>
         {opp.amount != null && (
           <Badge variant="secondary">{formatGTQ(opp.amount)}</Badge>
         )}
@@ -99,6 +103,7 @@ export function OpportunityCard({ opp, onAction, isOverlay = false }: Opportunit
           <Badge
             variant="outline"
             className={overdue ? 'text-destructive' : undefined}
+            data-testid={overdue ? 'follow-up-overdue' : undefined}
           >
             {formatDate(opp.nextFollowUpAt)}
           </Badge>

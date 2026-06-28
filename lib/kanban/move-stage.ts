@@ -1,5 +1,23 @@
 import type { Opportunity, OpportunityStatus, PipelineStage } from '@/lib/api/types/commercial';
 
+/** Minimal structural shape of dnd-kit's Over object needed for drop resolution. */
+type OverLike = { data: { current?: Record<string, unknown> } } | null | undefined;
+
+/**
+ * Pure function: decides whether a drag-end event should trigger a stage change.
+ * Returns the target { id, pipelineStageId } or null (same stage / no valid target).
+ */
+export function resolveDrop(
+  activeId: number,
+  over: OverLike,
+  opps: Opportunity[],
+): { id: number; pipelineStageId: number } | null {
+  const overStageId = over?.data.current?.['stageId'] as number | undefined;
+  const opp = opps.find((o) => o.id === activeId);
+  if (!opp || overStageId == null || overStageId === opp.pipelineStageId) return null;
+  return { id: activeId, pipelineStageId: overStageId };
+}
+
 export function applyStageMove(
   opps: Opportunity[],
   oppId: number,

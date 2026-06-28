@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyStageMove, applyStatusChange, groupByStage, sumColumnAmount } from './move-stage';
+import { applyStageMove, applyStatusChange, groupByStage, sumColumnAmount, resolveDrop } from './move-stage';
 import type { Opportunity, PipelineStage } from '@/lib/api/types/commercial';
 
 const opp = (id: number, stageId: number, amount?: number): Opportunity =>
@@ -55,5 +55,24 @@ describe('groupByStage', () => {
 describe('sumColumnAmount', () => {
   it('suma montos ignorando null/undefined', () => {
     expect(sumColumnAmount([opp(1, 1, 100), opp(2, 1), opp(3, 1, 50)])).toBe(150);
+  });
+});
+
+describe('resolveDrop', () => {
+  it('devuelve el id y el nuevo stageId cuando la tarjeta cae en otra columna', () => {
+    const result = resolveDrop(1, { data: { current: { stageId: 2 } } }, [opp(1, 1)]);
+    expect(result).toEqual({ id: 1, pipelineStageId: 2 });
+  });
+
+  it('devuelve null en un drop dentro de la misma columna', () => {
+    expect(resolveDrop(1, { data: { current: { stageId: 1 } } }, [opp(1, 1)])).toBeNull();
+  });
+
+  it('devuelve null cuando over.data.current no tiene stageId', () => {
+    expect(resolveDrop(1, { data: { current: {} } }, [opp(1, 1)])).toBeNull();
+  });
+
+  it('devuelve null cuando over es null (soltado fuera de cualquier zona)', () => {
+    expect(resolveDrop(1, null, [opp(1, 1)])).toBeNull();
   });
 });
