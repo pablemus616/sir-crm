@@ -75,7 +75,13 @@ export const candidatesResource = createResource<Candidate, typeof createCandida
     { name: 'birthDate', label: 'Fecha de nacimiento', type: 'date' },
     { name: 'headline', label: 'Titular', type: 'text', placeholder: 'ej. Desarrollador Full-Stack' },
     { name: 'source', label: 'Fuente', type: 'text', placeholder: 'ej. LinkedIn' },
-    { name: 'expectedSalary', label: 'Salario esperado', type: 'number' },
+    {
+      name: 'expectedSalary',
+      label: 'Salario esperado',
+      type: 'number',
+      placeholder: 'Q 0.00',
+      description: 'En quetzales (GTQ)',
+    },
     {
       name: 'status',
       label: 'Estado',
