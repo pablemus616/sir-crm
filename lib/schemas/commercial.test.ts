@@ -3,6 +3,7 @@ import {
   createOpportunitySchema,
   changeStageSchema,
   createClientContactSchema,
+  createContactHistorySchema,
 } from './commercial';
 
 describe('createOpportunitySchema', () => {
@@ -25,6 +26,17 @@ describe('createOpportunitySchema', () => {
       }),
     ).toThrow();
   });
+
+  it('rechaza seniority con valor inválido', () => {
+    expect(() =>
+      createOpportunitySchema.parse({
+        clientId: 1,
+        responsibleEmployeeId: 1,
+        pipelineStageId: 1,
+        seniority: 'invalid-level',
+      }),
+    ).toThrow();
+  });
 });
 
 describe('changeStageSchema', () => {
@@ -42,6 +54,19 @@ describe('createClientContactSchema', () => {
         name: 'Ana',
         clientId: 1,
         email: 'no-es-correo',
+      }),
+    ).toThrow();
+  });
+});
+
+describe('createContactHistorySchema', () => {
+  it('rechaza direction con valor inválido', () => {
+    expect(() =>
+      createContactHistorySchema.parse({
+        contactId: 1,
+        contactType: 1,
+        contactTime: '2026-06-27T10:00:00Z',
+        direction: 'invalid-dir',
       }),
     ).toThrow();
   });
