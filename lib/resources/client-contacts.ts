@@ -34,7 +34,7 @@ export const clientContactsResource = createResource<ClientContact, typeof creat
       { name: 'name', label: 'Nombre', type: 'text', placeholder: 'Juan Pérez' },
       { name: 'phoneNumber', label: 'Teléfono', type: 'text', placeholder: '+52 55 1234 5678' },
       { name: 'email', label: 'Correo', type: 'email', placeholder: 'juan@empresa.com' },
-      { name: 'clientId', label: 'ID de Cliente', type: 'number' },
+      { name: 'clientId', label: 'Cliente', type: 'select', optionsEndpoint: 'clients', placeholder: 'Seleccionar cliente…' },
     ],
     detailFields: [
       { label: 'Nombre', render: (r) => r.name },

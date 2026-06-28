@@ -31,7 +31,7 @@ export const clientsResource = createResource<Client, typeof createClientSchema>
   formFields: [
     { name: 'name', label: 'Nombre', type: 'text', placeholder: 'Empresa S.A.' },
     { name: 'sector', label: 'Sector', type: 'text', placeholder: 'ej. Tecnología' },
-    { name: 'sectorId', label: 'ID de Sector', type: 'number' },
+    { name: 'sectorId', label: 'Sector', type: 'select', optionsEndpoint: 'sectors', placeholder: 'Seleccionar sector…' },
     { name: 'employeeSize', label: 'Tamaño (empleados)', type: 'number' },
   ],
   detailFields: [

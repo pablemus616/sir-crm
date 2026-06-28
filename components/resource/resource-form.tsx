@@ -26,7 +26,65 @@ import {
 } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useList } from "@/lib/api/hooks";
 import type { FieldConfig } from "./field-config";
+
+type RhfField = {
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  name: string;
+};
+
+/**
+ * Sub-component: fetches options from an endpoint and renders a Select.
+ * Isolated into its own component so `useList` is always called consistently
+ * (hooks cannot be called conditionally or in a loop with varying endpoints).
+ * Mirrors the DynamicSelectFilter pattern in resource-filters.tsx.
+ */
+function DynamicSelectField({
+  field,
+  rhf,
+}: {
+  field: FieldConfig;
+  rhf: RhfField;
+}) {
+  const getLabel =
+    field.optionLabel ?? ((item: unknown) => (item as { name: string }).name);
+  const getValue =
+    field.optionValue ?? ((item: unknown) => (item as { id: number }).id);
+
+  const query = useList<unknown>(field.optionsEndpoint!, { limit: 100 });
+  const options = (query.data?.items ?? []).map((item) => ({
+    label: getLabel(item),
+    value: String(getValue(item)),
+  }));
+
+  const id = field.name;
+  return (
+    <Select
+      value={rhf.value != null ? String(rhf.value) : ""}
+      onValueChange={(value) => rhf.onChange(value)}
+    >
+      <SelectTrigger id={id}>
+        <SelectValue placeholder={field.placeholder ?? "Seleccionar…"} />
+      </SelectTrigger>
+      <SelectContent>
+        {query.isLoading ? (
+          <SelectItem value="__loading__" disabled>
+            Cargando…
+          </SelectItem>
+        ) : (
+          options.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectItem>
+          ))
+        )}
+      </SelectContent>
+    </Select>
+  );
+}
 
 export interface ResourceFormProps<S extends ZodType> {
   open: boolean;
@@ -77,7 +135,13 @@ export function ResourceForm<S extends ZodType>({
             render={({ field: rhf }) => (
               <FormItem>
                 <FormLabel htmlFor={field.name}>{field.label}</FormLabel>
-                <FormControl>{renderControl(field, rhf)}</FormControl>
+                <FormControl>
+                  {field.type === "select" && field.optionsEndpoint ? (
+                    <DynamicSelectField field={field} rhf={rhf} />
+                  ) : (
+                    renderControl(field, rhf)
+                  )}
+                </FormControl>
                 {field.description && <FormDescription>{field.description}</FormDescription>}
                 <FormMessage />
               </FormItem>
@@ -120,13 +184,6 @@ export function ResourceForm<S extends ZodType>({
     </Dialog>
   );
 }
-
-type RhfField = {
-  value: unknown;
-  onChange: (value: unknown) => void;
-  onBlur: () => void;
-  name: string;
-};
 
 function renderControl(field: FieldConfig, rhf: RhfField) {
   const id = field.name;
