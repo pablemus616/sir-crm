@@ -60,9 +60,35 @@ export function useCreateApplication() {
 }
 
 /**
+ * Aplica una etapa nueva a la entrada con `id` dentro de cualquier dato cacheado
+ * bajo la clave ['applications', ...] — sea una lista paginada o un detalle.
+ */
+function patchApplicationStage(
+  old: unknown,
+  id: number,
+  stage: ApplicationStage,
+): unknown {
+  if (!old || typeof old !== 'object') return old;
+  if ('items' in old && Array.isArray((old as Paginated<Application>).items)) {
+    const page = old as Paginated<Application>;
+    return {
+      ...page,
+      items: page.items.map((a) => (a.id === id ? { ...a, stage } : a)),
+    };
+  }
+  if ('id' in old && (old as Application).id === id) {
+    return { ...(old as Application), stage };
+  }
+  return old;
+}
+
+/**
  * Cambia la etapa de una aplicación (PATCH /applications/:id/stage). El backend
  * valida la transición contra su máquina de estados y responde 400 si es ilegal;
  * el front solo debe ofrecer las etapas permitidas (allowedNextStages).
+ *
+ * Actualización optimista: la tarjeta salta de columna de inmediato; ante un
+ * error se revierte el snapshot y al asentarse se invalida para reconciliar.
  */
 export function useChangeApplicationStage() {
   const qc = useQueryClient();
@@ -72,11 +98,23 @@ export function useChangeApplicationStage() {
         method: 'PATCH',
         body,
       }),
+    onMutate: async ({ id, stage }) => {
+      await qc.cancelQueries({ queryKey: KEY });
+      const snapshot = qc.getQueriesData({ queryKey: KEY });
+      qc.setQueriesData({ queryKey: KEY }, (old: unknown) =>
+        patchApplicationStage(old, id, stage),
+      );
+      return { snapshot };
+    },
     onSuccess: () => {
       toast.success('Etapa actualizada');
+    },
+    onError: (e, _vars, ctx) => {
+      ctx?.snapshot.forEach(([key, data]) => qc.setQueryData(key, data));
+      toast.error(e instanceof Error ? e.message : 'No se pudo cambiar la etapa');
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: KEY });
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo cambiar la etapa'),
   });
 }

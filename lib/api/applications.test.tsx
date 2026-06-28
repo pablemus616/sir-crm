@@ -118,4 +118,46 @@ describe('useChangeApplicationStage', () => {
       body: { stage: 'screening' },
     });
   });
+
+  it('mueve la tarjeta de etapa de forma optimista en la lista cacheada', async () => {
+    clientFetchMock.mockResolvedValue({ id: 5, stage: 'screening' });
+    const qc = freshClient();
+    qc.setQueryData(['applications', { stage: 'applied' }], {
+      items: [{ id: 5, stage: 'applied' }],
+      total: 1,
+      page: 1,
+      limit: 200,
+    });
+    const { result } = renderHook(() => useChangeApplicationStage(), {
+      wrapper: wrapper(qc),
+    });
+    result.current.mutate({ id: 5, stage: 'screening' });
+    // La etapa cambia ANTES de que se asiente la mutación (optimista).
+    await waitFor(() => {
+      const data = qc.getQueryData(['applications', { stage: 'applied' }]) as {
+        items: { id: number; stage: string }[];
+      };
+      expect(data.items[0].stage).toBe('screening');
+    });
+  });
+
+  it('revierte el cambio optimista cuando el backend rechaza (400)', async () => {
+    clientFetchMock.mockRejectedValueOnce(new Error('Illegal transition'));
+    const qc = freshClient();
+    qc.setQueryData(['applications', { stage: 'applied' }], {
+      items: [{ id: 5, stage: 'applied' }],
+      total: 1,
+      page: 1,
+      limit: 200,
+    });
+    const { result } = renderHook(() => useChangeApplicationStage(), {
+      wrapper: wrapper(qc),
+    });
+    result.current.mutate({ id: 5, stage: 'screening' });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    const data = qc.getQueryData(['applications', { stage: 'applied' }]) as {
+      items: { id: number; stage: string }[];
+    };
+    expect(data.items[0].stage).toBe('applied');
+  });
 });
