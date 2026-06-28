@@ -183,6 +183,10 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
                           <SelectItem value={PLACEHOLDER} disabled>
                             Cargando…
                           </SelectItem>
+                        ) : employees.isError ? (
+                          <SelectItem value={PLACEHOLDER} disabled>
+                            No se pudieron cargar los empleados.
+                          </SelectItem>
                         ) : (employees.data?.items.length ?? 0) === 0 ? (
                           <SelectItem value={PLACEHOLDER} disabled>
                             No hay empleados disponibles

@@ -1,7 +1,7 @@
 import { createResource } from '@/lib/resources/create-resource';
 import { createClientSchema } from '@/lib/schemas/commercial';
 import type { Client } from '@/lib/api/types/commercial';
-import { ClientContactsList } from '@/components/resource/client-detail';
+import { ClientContactsList, SectorName } from '@/components/resource/client-detail';
 
 export const clientsResource = createResource<Client, typeof createClientSchema>({
   key: 'clients',
@@ -18,7 +18,7 @@ export const clientsResource = createResource<Client, typeof createClientSchema>
     {
       id: 'sector',
       header: 'Sector',
-      cell: ({ row }) => row.original.sector ?? '—',
+      cell: ({ row }) => <SectorName client={row.original} />,
     },
     {
       id: 'employeeSize',
@@ -35,7 +35,7 @@ export const clientsResource = createResource<Client, typeof createClientSchema>
   ],
   detailFields: [
     { label: 'Nombre', render: (r) => r.name },
-    { label: 'Sector', render: (r) => r.sector ?? '—' },
+    { label: 'Sector', render: (r) => <SectorName client={r} /> },
     { label: 'Empleados', render: (r) => (r.employeeSize != null ? String(r.employeeSize) : '—') },
     { label: 'Contactos', render: (r) => <ClientContactsList clientId={r.id} /> },
   ],

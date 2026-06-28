@@ -21,6 +21,7 @@ import { ResourceDetail } from "./resource-detail";
 import { ResourceFilters } from "./resource-filters";
 import type { ResourceDescriptor } from "@/lib/resources/types";
 import type { ListParams } from "@/lib/api/types";
+import { toSpanishError } from "@/lib/api/error-message";
 
 export function ResourceView<T extends { id: string | number }, S extends ZodType>({
   resource,
@@ -92,7 +93,7 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
       await remove.mutateAsync(pendingDelete.id);
       toast.success(`${config.singular} eliminado.`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo eliminar.");
+      toast.error(toSpanishError(err, "No se pudo eliminar."));
     } finally {
       setPendingDelete(null);
     }

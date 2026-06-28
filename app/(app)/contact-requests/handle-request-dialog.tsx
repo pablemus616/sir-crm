@@ -20,9 +20,13 @@ import { useList } from '@/lib/api/hooks';
 import { useHandleRequest } from '@/lib/api/contact-requests';
 import type { Client, ContactRequest } from '@/lib/api/types/commercial';
 
-/** Centinela para el item placeholder (cargando / vacío): base-ui Select exige
- *  un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
+/** Centinela para el item placeholder (cargando / vacío / error): base-ui Select
+ *  exige un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
 const PLACEHOLDER = '__placeholder__';
+/** Centinela para limpiar la selección de un campo opcional de vuelta a "ninguno". */
+const NONE = '__none__';
+/** Cota máxima de clientes cargados en el combo (el backend ordena por id DESC). */
+const CLIENTS_LIMIT = 200;
 
 export function HandleRequestDialog({
   request,
@@ -32,7 +36,7 @@ export function HandleRequestDialog({
   onClose: () => void;
 }) {
   const handle = useHandleRequest();
-  const clients = useList<Client>('clients', { limit: 200 });
+  const clients = useList<Client>('clients', { limit: CLIENTS_LIMIT });
   const [clientId, setClientId] = useState('');
 
   if (!request) return null;
@@ -49,6 +53,8 @@ export function HandleRequestDialog({
     );
 
   const items = clients.data?.items ?? [];
+  const total = clients.data?.total ?? 0;
+  const truncated = total > items.length;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -66,7 +72,10 @@ export function HandleRequestDialog({
         )}
         <div className="space-y-1">
           <Label htmlFor="clientId">Cliente resultante (opcional)</Label>
-          <Select value={clientId} onValueChange={(v) => setClientId(v ?? '')}>
+          <Select
+            value={clientId}
+            onValueChange={(v) => setClientId(v === NONE ? '' : (v ?? ''))}
+          >
             <SelectTrigger id="clientId" className="w-full">
               <SelectValue placeholder="Seleccionar cliente…" />
             </SelectTrigger>
@@ -75,16 +84,28 @@ export function HandleRequestDialog({
                 <SelectItem value={PLACEHOLDER} disabled>
                   Cargando…
                 </SelectItem>
+              ) : clients.isError ? (
+                <SelectItem value={PLACEHOLDER} disabled>
+                  No se pudieron cargar los clientes.
+                </SelectItem>
               ) : items.length === 0 ? (
                 <SelectItem value={PLACEHOLDER} disabled>
                   No hay clientes disponibles
                 </SelectItem>
               ) : (
-                items.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>
-                    {c.name}
-                  </SelectItem>
-                ))
+                <>
+                  <SelectItem value={NONE}>Sin cliente</SelectItem>
+                  {items.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                  {truncated && (
+                    <SelectItem value={PLACEHOLDER} disabled>
+                      Mostrando los {items.length} clientes más recientes de {total}.
+                    </SelectItem>
+                  )}
+                </>
               )}
             </SelectContent>
           </Select>

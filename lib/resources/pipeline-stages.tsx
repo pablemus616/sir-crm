@@ -34,7 +34,7 @@ export const pipelineStagesResource = createResource<PipelineStage, typeof creat
     {
       id: 'isLost',
       header: 'Perdedora',
-      cell: ({ row }) => <YesNoBadge value={row.original.isLost} />,
+      cell: ({ row }) => <YesNoBadge value={row.original.isLost} tone="negative" />,
     },
     {
       id: 'active',
@@ -61,7 +61,7 @@ export const pipelineStagesResource = createResource<PipelineStage, typeof creat
     { label: 'Orden', render: (r) => String(r.sortOrder) },
     { label: 'Probabilidad', render: (r) => `${r.probability}%` },
     { label: 'Ganadora', render: (r) => <YesNoBadge value={r.isWon} /> },
-    { label: 'Perdedora', render: (r) => <YesNoBadge value={r.isLost} /> },
+    { label: 'Perdedora', render: (r) => <YesNoBadge value={r.isLost} tone="negative" /> },
     { label: 'Activa', render: (r) => <YesNoBadge value={r.active} /> },
   ],
   emptyFormValues: {

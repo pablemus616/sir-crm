@@ -5,9 +5,20 @@ import { Badge } from "@/components/ui/badge";
  * columnas de lista y los campos de detalle de catálogos se vean igual en todas
  * partes. `value` puede venir null/undefined desde el backend; lo tratamos como
  * falso (No).
+ *
+ * `tone` ajusta el color del "Sí": por defecto ("positive") usa el color de
+ * marca; para flags negativos como `isLost` ("negative") usa un tono destructivo
+ * tenue, evitando resaltar un estado negativo como si fuera bueno.
  */
-export function YesNoBadge({ value }: { value?: boolean | null }) {
+export function YesNoBadge({
+  value,
+  tone = "positive",
+}: {
+  value?: boolean | null;
+  tone?: "positive" | "negative";
+}) {
+  const yesVariant = tone === "negative" ? "destructive" : "default";
   return (
-    <Badge variant={value ? "default" : "secondary"}>{value ? "Sí" : "No"}</Badge>
+    <Badge variant={value ? yesVariant : "secondary"}>{value ? "Sí" : "No"}</Badge>
   );
 }

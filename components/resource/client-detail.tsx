@@ -3,11 +3,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { createResourceClient } from '@/lib/api/resource-client';
+import { useList } from '@/lib/api/hooks';
 import type { Client, ClientContact } from '@/lib/api/types/commercial';
+import type { Sector } from '@/lib/api/types/catalogs';
 
 type ClientWithContacts = Client & { contacts?: ClientContact[] };
 
 const clientsApiClient = createResourceClient<ClientWithContacts>('clients');
+
+/**
+ * Resuelve el sector visible de un cliente. El formulario solo escribe `sectorId`
+ * (la relación canónica), pero el backend ni expande la relación ni deriva la
+ * columna de texto legado `sector`. Para que la selección del formulario sea
+ * visible en la lista y el detalle, resolvemos el id contra el catálogo de
+ * sectores y caemos al texto legado cuando exista.
+ */
+export function SectorName({ client }: { client: Client }) {
+  const sectors = useList<Sector>('sectors', { limit: 200 });
+  const resolved =
+    client.sectorId != null
+      ? sectors.data?.items.find((s) => s.id === client.sectorId)?.name
+      : undefined;
+  return <>{resolved ?? client.sector ?? '—'}</>;
+}
 
 /**
  * Lista de contactos de un cliente obtenida vía GET /clients/:id.
