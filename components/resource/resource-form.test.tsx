@@ -126,6 +126,55 @@ describe("ResourceForm", () => {
   });
 });
 
+// ── Date field tests ───────────────────────────────────────────────────────────
+
+const dateSchema = z.object({
+  birthDate: z.string().optional(),
+});
+const dateFields = [
+  { name: "birthDate", label: "Fecha de nacimiento", type: "date" as const },
+];
+
+function setupDate(
+  onSubmit: (v: unknown) => Promise<void>,
+  defaultValues: { birthDate?: string } = { birthDate: "" },
+) {
+  return render(
+    <ResourceForm
+      open
+      onOpenChange={() => {}}
+      title="Nuevo candidato"
+      schema={dateSchema}
+      fields={dateFields}
+      defaultValues={defaultValues}
+      onSubmit={onSubmit}
+    />,
+  );
+}
+
+describe("ResourceForm – campo type='date'", () => {
+  it("renderiza un <input type='date'> enlazado al valor por defecto", () => {
+    setupDate(vi.fn(async () => {}), { birthDate: "1990-05-15" });
+    const input = screen.getByLabelText("Fecha de nacimiento");
+    expect(input).toHaveAttribute("type", "date");
+    expect(input).toHaveValue("1990-05-15");
+  });
+
+  it("al cambiar la fecha, onSubmit recibe el nuevo valor 'YYYY-MM-DD'", async () => {
+    const onSubmit = vi.fn(async () => {});
+    setupDate(onSubmit);
+    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), {
+      target: { value: "2000-01-31" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Guardar/i }));
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ birthDate: "2000-01-31" }),
+      ),
+    );
+  });
+});
+
 // ── Dynamic-select field tests ─────────────────────────────────────────────────
 
 const emptyToUndefined = (v: unknown) =>

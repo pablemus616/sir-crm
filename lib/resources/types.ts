@@ -36,6 +36,8 @@ export interface ResourceConfig<T, S extends ZodType> {
   searchParam?: string;
   defaultLimit?: number;
   filters?: ResourceFilter[];
+  /** Container for the create/edit form. Defaults to 'dialog'; use 'sheet' for long forms. */
+  formContainer?: "dialog" | "sheet";
 }
 
 export interface ResourceDescriptor<T, S extends ZodType> {

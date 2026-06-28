@@ -1,4 +1,11 @@
-export type FieldType = "text" | "number" | "email" | "textarea" | "select" | "switch";
+export type FieldType =
+  | "text"
+  | "number"
+  | "email"
+  | "textarea"
+  | "select"
+  | "switch"
+  | "date";
 
 export interface FieldOption {
   label: string;

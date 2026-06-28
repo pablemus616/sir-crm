@@ -141,6 +141,7 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
         title={editing ? `Editar ${config.singular}` : `Nuevo ${config.singular}`}
         schema={config.formSchema}
         fields={config.formFields}
+        container={config.formContainer}
         defaultValues={editing ? (editing as never) : config.emptyFormValues}
         onSubmit={handleSubmit}
       />

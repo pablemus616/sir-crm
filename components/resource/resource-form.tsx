@@ -224,6 +224,16 @@ function renderControl(field: FieldConfig, rhf: RhfField) {
           </SelectContent>
         </Select>
       );
+    case "date":
+      return (
+        <Input
+          id={id}
+          type="date"
+          value={(rhf.value as string) ?? ""}
+          onChange={rhf.onChange as React.ChangeEventHandler<HTMLInputElement>}
+          onBlur={rhf.onBlur}
+        />
+      );
     case "number":
       return (
         <Input
