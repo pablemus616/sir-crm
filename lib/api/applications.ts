@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientFetch } from '@/lib/api/client';
+import { toSpanishError } from '@/lib/api/error-message';
 import type { Paginated } from '@/lib/api/types';
 import type { Application, ApplicationStage } from '@/lib/api/types/recruitment';
 import type {
@@ -54,8 +55,7 @@ export function useCreateApplication() {
       toast.success('Aplicación creada');
       qc.invalidateQueries({ queryKey: KEY });
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo crear la aplicación'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo crear la aplicación')),
   });
 }
 
@@ -111,7 +111,7 @@ export function useChangeApplicationStage() {
     },
     onError: (e, _vars, ctx) => {
       ctx?.snapshot.forEach(([key, data]) => qc.setQueryData(key, data));
-      toast.error(e instanceof Error ? e.message : 'No se pudo cambiar la etapa');
+      toast.error(toSpanishError(e, 'No se pudo cambiar la etapa'));
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: KEY });

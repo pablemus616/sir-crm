@@ -1,7 +1,7 @@
 import { createResource } from '@/lib/resources/create-resource';
 import { createSectorSchema } from '@/lib/schemas/catalogs';
 import type { Sector } from '@/lib/api/types/catalogs';
-import { Badge } from '@/components/ui/badge';
+import { YesNoBadge } from '@/components/ui/yes-no-badge';
 
 export const sectorsResource = createResource<Sector, typeof createSectorSchema>({
   key: 'sectors',
@@ -17,11 +17,7 @@ export const sectorsResource = createResource<Sector, typeof createSectorSchema>
     {
       id: 'active',
       header: 'Activo',
-      cell: ({ row }) => (
-        <Badge variant={row.original.active ? 'default' : 'secondary'}>
-          {row.original.active ? 'Sí' : 'No'}
-        </Badge>
-      ),
+      cell: ({ row }) => <YesNoBadge value={row.original.active} />,
     },
   ],
   formSchema: createSectorSchema,
@@ -31,7 +27,7 @@ export const sectorsResource = createResource<Sector, typeof createSectorSchema>
   ],
   detailFields: [
     { label: 'Nombre', render: (r) => r.name },
-    { label: 'Activo', render: (r) => (r.active ? 'Sí' : 'No') },
+    { label: 'Activo', render: (r) => <YesNoBadge value={r.active} /> },
   ],
   emptyFormValues: {
     name: '',

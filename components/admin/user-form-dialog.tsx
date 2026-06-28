@@ -34,6 +34,10 @@ import { useCreateUser, useUpdateUser } from '@/lib/api/users';
 import { createUserSchema, updateUserSchema, type CreateUserInput } from '@/lib/schemas/admin';
 import type { Employee, User } from '@/lib/api/types/admin';
 
+/** Centinela para el item placeholder (cargando / vacío): base-ui Select exige
+ *  un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
+const PLACEHOLDER = '__placeholder__';
+
 interface UserFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -175,11 +179,21 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
                         <SelectValue placeholder="Selecciona un empleado" />
                       </SelectTrigger>
                       <SelectContent>
-                        {employees.data?.items.map((e) => (
-                          <SelectItem key={e.id} value={String(e.id)}>
-                            {`${e.firstName} ${e.lastName}`}
+                        {employees.isLoading ? (
+                          <SelectItem value={PLACEHOLDER} disabled>
+                            Cargando…
                           </SelectItem>
-                        ))}
+                        ) : (employees.data?.items.length ?? 0) === 0 ? (
+                          <SelectItem value={PLACEHOLDER} disabled>
+                            No hay empleados disponibles
+                          </SelectItem>
+                        ) : (
+                          employees.data?.items.map((e) => (
+                            <SelectItem key={e.id} value={String(e.id)}>
+                              {`${e.firstName} ${e.lastName}`}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>

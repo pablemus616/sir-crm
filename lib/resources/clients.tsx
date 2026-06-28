@@ -30,7 +30,6 @@ export const clientsResource = createResource<Client, typeof createClientSchema>
   formSchema: createClientSchema,
   formFields: [
     { name: 'name', label: 'Nombre', type: 'text', placeholder: 'Empresa S.A.' },
-    { name: 'sector', label: 'Sector', type: 'text', placeholder: 'ej. Tecnología' },
     { name: 'sectorId', label: 'Sector', type: 'select', optionsEndpoint: 'sectors', placeholder: 'Seleccionar sector…' },
     { name: 'employeeSize', label: 'Tamaño (empleados)', type: 'number' },
   ],
@@ -42,7 +41,6 @@ export const clientsResource = createResource<Client, typeof createClientSchema>
   ],
   emptyFormValues: {
     name: '',
-    sector: '',
     sectorId: undefined,
     employeeSize: undefined,
   },

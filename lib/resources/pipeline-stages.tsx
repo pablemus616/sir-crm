@@ -1,6 +1,7 @@
 import { createResource } from '@/lib/resources/create-resource';
 import { createPipelineStageSchema } from '@/lib/schemas/catalogs';
 import type { PipelineStage } from '@/lib/api/types/commercial';
+import { YesNoBadge } from '@/components/ui/yes-no-badge';
 
 export const pipelineStagesResource = createResource<PipelineStage, typeof createPipelineStageSchema>({
   key: 'pipeline-stages',
@@ -28,17 +29,17 @@ export const pipelineStagesResource = createResource<PipelineStage, typeof creat
     {
       id: 'isWon',
       header: 'Ganadora',
-      cell: ({ row }) => (row.original.isWon ? 'Sí' : 'No'),
+      cell: ({ row }) => <YesNoBadge value={row.original.isWon} />,
     },
     {
       id: 'isLost',
       header: 'Perdedora',
-      cell: ({ row }) => (row.original.isLost ? 'Sí' : 'No'),
+      cell: ({ row }) => <YesNoBadge value={row.original.isLost} />,
     },
     {
       id: 'active',
       header: 'Activa',
-      cell: ({ row }) => (row.original.active ? 'Sí' : 'No'),
+      cell: ({ row }) => <YesNoBadge value={row.original.active} />,
     },
   ],
   formSchema: createPipelineStageSchema,
@@ -59,9 +60,9 @@ export const pipelineStagesResource = createResource<PipelineStage, typeof creat
     { label: 'Nombre', render: (r) => r.name },
     { label: 'Orden', render: (r) => String(r.sortOrder) },
     { label: 'Probabilidad', render: (r) => `${r.probability}%` },
-    { label: 'Ganadora', render: (r) => (r.isWon ? 'Sí' : 'No') },
-    { label: 'Perdedora', render: (r) => (r.isLost ? 'Sí' : 'No') },
-    { label: 'Activa', render: (r) => (r.active ? 'Sí' : 'No') },
+    { label: 'Ganadora', render: (r) => <YesNoBadge value={r.isWon} /> },
+    { label: 'Perdedora', render: (r) => <YesNoBadge value={r.isLost} /> },
+    { label: 'Activa', render: (r) => <YesNoBadge value={r.active} /> },
   ],
   emptyFormValues: {
     name: '',

@@ -9,7 +9,7 @@ import { HandleRequestDialog } from './handle-request-dialog';
 import { formatDateTime } from '@/lib/format';
 import type { ContactRequest } from '@/lib/api/types/commercial';
 
-function RequestList({ wasHandled }: { wasHandled: boolean }) {
+function RequestList({ wasHandled }: { wasHandled?: boolean }) {
   const q = useContactRequests(wasHandled);
   const [selected, setSelected] = useState<ContactRequest | null>(null);
 
@@ -48,8 +48,8 @@ function RequestList({ wasHandled }: { wasHandled: boolean }) {
                 <p className="truncate text-sm font-medium text-foreground">
                   {r.name ?? 'Sin nombre'}
                 </p>
-                <Badge variant={wasHandled ? 'secondary' : 'outline'}>
-                  {wasHandled ? 'Atendida' : 'Pendiente'}
+                <Badge variant={r.wasHandled ? 'secondary' : 'outline'}>
+                  {r.wasHandled ? 'Atendida' : 'Pendiente'}
                 </Badge>
               </div>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -58,14 +58,14 @@ function RequestList({ wasHandled }: { wasHandled: boolean }) {
               {r.message && (
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.message}</p>
               )}
-              {wasHandled && r.resultingClientId && (
+              {r.wasHandled && r.resultingClientId && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Cliente vinculado: #{r.resultingClientId}
                 </p>
               )}
             </div>
             <div className="shrink-0">
-              {!wasHandled && (
+              {!r.wasHandled && (
                 <Button size="sm" onClick={() => setSelected(r)}>
                   Atender
                 </Button>
@@ -89,12 +89,16 @@ export function RequestsInbox() {
         <TabsList>
           <TabsTrigger value="pending">Pendientes</TabsTrigger>
           <TabsTrigger value="handled">Atendidas</TabsTrigger>
+          <TabsTrigger value="all">Todas</TabsTrigger>
         </TabsList>
         <TabsContent value="pending" className="mt-4">
           <RequestList wasHandled={false} />
         </TabsContent>
         <TabsContent value="handled" className="mt-4">
           <RequestList wasHandled={true} />
+        </TabsContent>
+        <TabsContent value="all" className="mt-4">
+          <RequestList />
         </TabsContent>
       </Tabs>
     </div>

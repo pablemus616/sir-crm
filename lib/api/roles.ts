@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientFetch } from '@/lib/api/client';
 import { resourceKeys } from '@/lib/api/query-keys';
+import { toSpanishError } from '@/lib/api/error-message';
 import type { Role } from '@/lib/api/types/admin';
 
 /**
@@ -41,8 +42,7 @@ export function useAssignPermission() {
       qc.invalidateQueries({ queryKey: ROLES_KEY });
       toast.success('Permiso asignado');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo asignar el permiso'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo asignar el permiso')),
   });
 }
 
@@ -61,7 +61,6 @@ export function useRemovePermission() {
       qc.invalidateQueries({ queryKey: ROLES_KEY });
       toast.success('Permiso removido');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo remover el permiso'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo remover el permiso')),
   });
 }

@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientFetch } from '@/lib/api/client';
+import { toSpanishError } from '@/lib/api/error-message';
 import type { Paginated } from '@/lib/api/types';
 import type { Placement, PlacementStatus } from '@/lib/api/types/recruitment';
 import type { CreatePlacementInput } from '@/lib/schemas/recruitment';
@@ -66,7 +67,6 @@ export function useCreatePlacement() {
       qc.invalidateQueries({ queryKey: ['opportunities'] });
       qc.invalidateQueries({ queryKey: ['applications'] });
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo registrar el placement'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo registrar el placement')),
   });
 }

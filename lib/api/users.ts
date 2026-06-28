@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientFetch } from '@/lib/api/client';
 import { resourceKeys } from '@/lib/api/query-keys';
+import { toSpanishError } from '@/lib/api/error-message';
 import type { Paginated } from '@/lib/api/types';
 import type { User } from '@/lib/api/types/admin';
 import type { CreateUserInput, UpdateUserInput } from '@/lib/schemas/admin';
@@ -54,8 +55,7 @@ export function useCreateUser() {
       qc.invalidateQueries({ queryKey: USERS_KEY });
       toast.success('Usuario creado');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo crear el usuario'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo crear el usuario')),
   });
 }
 
@@ -78,8 +78,7 @@ export function useUpdateUser() {
       qc.invalidateQueries({ queryKey: USERS_KEY });
       toast.success('Usuario actualizado');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo actualizar el usuario'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo actualizar el usuario')),
   });
 }
 
@@ -93,8 +92,7 @@ export function useDeleteUser() {
       qc.invalidateQueries({ queryKey: USERS_KEY });
       toast.success('Usuario eliminado');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo eliminar el usuario'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo eliminar el usuario')),
   });
 }
 
@@ -114,8 +112,7 @@ export function useAssignRole() {
       qc.invalidateQueries({ queryKey: USERS_KEY });
       toast.success('Rol asignado');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo asignar el rol'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo asignar el rol')),
   });
 }
 
@@ -134,7 +131,6 @@ export function useRemoveRole() {
       qc.invalidateQueries({ queryKey: USERS_KEY });
       toast.success('Rol removido');
     },
-    onError: (e) =>
-      toast.error(e instanceof Error ? e.message : 'No se pudo remover el rol'),
+    onError: (e) => toast.error(toSpanishError(e, 'No se pudo remover el rol')),
   });
 }

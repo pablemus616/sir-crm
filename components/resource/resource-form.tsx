@@ -27,6 +27,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useList } from "@/lib/api/hooks";
+import { toSpanishError } from "@/lib/api/error-message";
 import type { FieldConfig } from "./field-config";
 
 type RhfField = {
@@ -120,7 +121,7 @@ export function ResourceForm<S extends ZodType>({
       onOpenChange(false);
       form.reset(defaultValues);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo guardar.");
+      toast.error(toSpanishError(err, "No se pudo guardar."));
     }
   }
 

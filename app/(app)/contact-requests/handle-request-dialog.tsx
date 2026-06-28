@@ -8,10 +8,21 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useList } from '@/lib/api/hooks';
 import { useHandleRequest } from '@/lib/api/contact-requests';
-import type { ContactRequest } from '@/lib/api/types/commercial';
+import type { Client, ContactRequest } from '@/lib/api/types/commercial';
+
+/** Centinela para el item placeholder (cargando / vacío): base-ui Select exige
+ *  un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
+const PLACEHOLDER = '__placeholder__';
 
 export function HandleRequestDialog({
   request,
@@ -21,6 +32,7 @@ export function HandleRequestDialog({
   onClose: () => void;
 }) {
   const handle = useHandleRequest();
+  const clients = useList<Client>('clients', { limit: 200 });
   const [clientId, setClientId] = useState('');
 
   if (!request) return null;
@@ -35,6 +47,8 @@ export function HandleRequestDialog({
         },
       },
     );
+
+  const items = clients.data?.items ?? [];
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -52,14 +66,28 @@ export function HandleRequestDialog({
         )}
         <div className="space-y-1">
           <Label htmlFor="clientId">Cliente resultante (opcional)</Label>
-          <Input
-            id="clientId"
-            type="number"
-            min={1}
-            value={clientId}
-            onChange={(e) => setClientId(e.target.value)}
-            placeholder="ID de cliente"
-          />
+          <Select value={clientId} onValueChange={(v) => setClientId(v ?? '')}>
+            <SelectTrigger id="clientId" className="w-full">
+              <SelectValue placeholder="Seleccionar cliente…" />
+            </SelectTrigger>
+            <SelectContent>
+              {clients.isLoading ? (
+                <SelectItem value={PLACEHOLDER} disabled>
+                  Cargando…
+                </SelectItem>
+              ) : items.length === 0 ? (
+                <SelectItem value={PLACEHOLDER} disabled>
+                  No hay clientes disponibles
+                </SelectItem>
+              ) : (
+                items.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
