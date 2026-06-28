@@ -109,6 +109,15 @@ describe('createApplicationSchema', () => {
     expect(() => createApplicationSchema.parse({ opportunityId: 7 })).toThrow();
   });
 
+  it('id sin seleccionar muestra mensaje en español (no el default inglés de zod)', () => {
+    const r = createApplicationSchema.safeParse({ opportunityId: 7 });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const msg = r.error.issues.find((i) => i.path[0] === 'candidateId')?.message;
+      expect(msg).toBe('Selecciona una opción');
+    }
+  });
+
   it('coacciona ids string → number', () => {
     const r = createApplicationSchema.parse({ candidateId: '3', opportunityId: '7' });
     expect(r.candidateId).toBe(3);

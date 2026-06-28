@@ -6,8 +6,15 @@ import {
   PLACEMENT_STATUSES,
 } from '@/lib/api/types/recruitment';
 
-/** Required positive-int id field (mirrors commercial.ts idField). */
-const idField = z.coerce.number().int().positive();
+/**
+ * Required positive-int id field (mirrors commercial.ts idField). Spanish
+ * messages so an unselected combo (undefined -> NaN) shows "Selecciona una
+ * opción" instead of zod's default English "Expected number, received nan".
+ */
+const idField = z.coerce
+  .number({ invalid_type_error: 'Selecciona una opción' })
+  .int('Selecciona una opción')
+  .positive('Selecciona una opción');
 
 /**
  * Optional enum: native <select> empty option submits '' which a bare
