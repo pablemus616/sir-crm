@@ -24,3 +24,14 @@ export interface Permission {
   id: number;
   name: string;
 }
+
+/* ------------------------------------------------------------------ */
+/* Roles                                                              */
+/* ------------------------------------------------------------------ */
+
+export interface Role {
+  id: number;
+  name: string;
+  /** Serializado como objetos completos {id,name} en la lista y en GET /roles/:id. */
+  permissions?: Permission[];
+}

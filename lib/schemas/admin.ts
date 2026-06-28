@@ -37,3 +37,15 @@ export const createPermissionSchema = z.object({
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
 });
 export type CreatePermissionInput = z.infer<typeof createPermissionSchema>;
+
+/**
+ * Roles. El backend solo acepta `name` al crear/editar; la asignación M:N de
+ * permisos se hace por sub-rutas dedicadas (un permiso por llamada), no aquí.
+ */
+export const createRoleSchema = z.object({
+  name: z.string().trim().min(1, 'El nombre es obligatorio'),
+});
+export type CreateRoleInput = z.infer<typeof createRoleSchema>;
+
+export const updateRoleSchema = createRoleSchema.partial();
+export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
