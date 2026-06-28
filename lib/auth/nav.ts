@@ -5,6 +5,7 @@ import {
   Contact,
   FileText,
   GitBranch,
+  History,
   IdCard,
   Inbox,
   Key,
@@ -48,6 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Clientes', href: '/clients', icon: Building2, access: 'auth' },
       { label: 'Contactos', href: '/client-contacts', icon: Contact, access: 'auth' },
       { label: 'Requests', href: '/contact-requests', icon: Inbox, access: 'auth' },
+      { label: 'Historial', href: '/contact-history', icon: History, access: 'auth' },
     ],
   },
   {

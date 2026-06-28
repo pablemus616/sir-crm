@@ -78,13 +78,15 @@ export interface ContactRequest {
 export interface ContactHistory {
   id: number;
   contactId: number;
-  contactType: number;
+  contact?: ClientContact | null;
+  contactType?: { id: number; name: string } | null;
   contactTime: string;
   callLength?: number | null;
   contactDesc?: string | null;
   phoneNumberDialed?: string | null;
   direction?: ContactDirection | null;
   opportunityId?: number | null;
+  opportunity?: { id: number; title?: string | null } | null;
   employeeId?: number | null;
-  createdAt: string;
+  employee?: { id: number; firstName?: string; lastName?: string } | null;
 }
