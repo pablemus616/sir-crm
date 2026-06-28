@@ -55,6 +55,33 @@ test.describe('autenticado como admin', () => {
     }
   });
 
+  // Las páginas createResource (Server Component) deben pasar SOLO una key al
+  // wrapper cliente; pasar el descriptor (con funciones) rompía la serialización
+  // RSC -> 500 en producción. Aserto que renderizan contenido real (botón "Nuevo"
+  // de ResourceView), no solo que la URL no redirige.
+  test('las páginas de recurso renderizan contenido (no 500 RSC)', async ({ page }) => {
+    for (const path of ['/clients', '/candidates', '/sectors', '/roles', '/employees', '/permissions']) {
+      await page.goto(path);
+      await expect(page, `${path} debe renderizar (no 500)`).toHaveURL(
+        new RegExp(path.replace(/\//g, '\\/')),
+      );
+      await expect(
+        page.getByRole('button', { name: 'Nuevo' }),
+        `${path} debe mostrar el botón Nuevo`,
+      ).toBeVisible();
+    }
+  });
+
+  // El menú de usuario (avatar) abría con un crash de Base UI (DropdownMenuLabel
+  // fuera de un DropdownMenuGroup) -> el dropdown no abría. Aserto que abre y que
+  // "Cerrar sesión" funciona.
+  test('el menú de usuario abre y permite cerrar sesión', async ({ page }) => {
+    await page.getByRole('button', { name: 'Menú de usuario' }).click();
+    await expect(page.getByText('Cerrar sesión')).toBeVisible();
+    await page.getByText('Cerrar sesión').click();
+    await expect(page).toHaveURL(/\/login/);
+  });
+
   test('un admin puede entrar a las rutas (admin)', async ({ page }) => {
     await page.goto('/users');
     await expect(page).toHaveURL(/\/users/);

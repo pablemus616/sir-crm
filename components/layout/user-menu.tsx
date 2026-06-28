@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -31,23 +32,25 @@ export function UserMenu({ me }: { me: Me }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" className="gap-2 px-2" />
+          <Button variant="ghost" className="gap-2 px-2" aria-label="Menú de usuario">
+            <Avatar className="size-8">
+              <AvatarFallback className="bg-accent text-accent-foreground">
+                {initials(me)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden text-sm font-medium sm:inline">{displayName}</span>
+          </Button>
         }
-      >
-        <Avatar className="size-8">
-          <AvatarFallback className="bg-accent text-accent-foreground">
-            {initials(me)}
-          </AvatarFallback>
-        </Avatar>
-        <span className="hidden text-sm font-medium sm:inline">{displayName}</span>
-      </DropdownMenuTrigger>
+      />
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <p className="text-sm font-medium">{displayName}</p>
-          <p className="text-xs text-muted-foreground">
-            {me.roles.map((r) => r.name).join(', ')}
-          </p>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-xs text-muted-foreground">
+              {me.roles.map((r) => r.name).join(', ')}
+            </p>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={logout.isPending}
