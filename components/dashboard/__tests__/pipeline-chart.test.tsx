@@ -1,5 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { UseQueryResult } from '@tanstack/react-query';
+import type { PipelineStageMetric } from '@/lib/api/metrics-types';
 
 /**
  * jsdom tiene dimensiones cero, por lo que Recharts no renderiza SVG por defecto.
@@ -41,7 +43,7 @@ describe('PipelineChart', () => {
       isPending: true,
       isError: false,
       error: null,
-    } as ReturnType<typeof usePipeline>);
+    } as unknown as UseQueryResult<PipelineStageMetric[], Error>);
 
     const { container } = render(<PipelineChart />);
     // ChartCard muestra skeleton (div) en lugar del SVG
@@ -54,7 +56,7 @@ describe('PipelineChart', () => {
       isPending: false,
       isError: false,
       error: null,
-    } as ReturnType<typeof usePipeline>);
+    } as unknown as UseQueryResult<PipelineStageMetric[], Error>);
 
     const { getByText } = render(<PipelineChart />);
     expect(getByText(/sin datos/i)).toBeTruthy();
@@ -69,7 +71,7 @@ describe('PipelineChart', () => {
       isPending: false,
       isError: false,
       error: null,
-    } as ReturnType<typeof usePipeline>);
+    } as unknown as UseQueryResult<PipelineStageMetric[], Error>);
 
     const { container } = render(<PipelineChart />);
     expect(container.querySelector('svg')).toBeTruthy();
@@ -81,7 +83,7 @@ describe('PipelineChart', () => {
       isPending: false,
       isError: true,
       error: new Error('Error de prueba'),
-    } as ReturnType<typeof usePipeline>);
+    } as unknown as UseQueryResult<PipelineStageMetric[], Error>);
 
     const { getByText } = render(<PipelineChart />);
     expect(getByText(/Error de prueba/i)).toBeTruthy();
@@ -93,7 +95,7 @@ describe('PipelineChart', () => {
       isPending: false,
       isError: false,
       error: null,
-    } as ReturnType<typeof usePipeline>);
+    } as unknown as UseQueryResult<PipelineStageMetric[], Error>);
 
     const { container } = render(<PipelineChart />);
     const styleTag = container.querySelector('style');

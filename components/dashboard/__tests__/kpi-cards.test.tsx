@@ -1,5 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import type { UseQueryResult } from '@tanstack/react-query';
+import type { CommercialMetrics } from '@/lib/api/metrics-types';
 
 vi.mock('@/lib/dashboard/use-dashboard-filters', () => ({
   useDashboardFilters: () => ({ filters: {} }),
@@ -50,7 +52,7 @@ describe('KpiCards', () => {
       isPending: true,
       isError: false,
       data: undefined,
-    });
+    } as unknown as UseQueryResult<CommercialMetrics, Error>);
 
     render(<KpiCards />);
     expect(screen.getByTestId('kpi-cards-skeleton')).toBeInTheDocument();
@@ -64,7 +66,7 @@ describe('KpiCards', () => {
       isError: true,
       error: new Error('Error al cargar métricas'),
       data: undefined,
-    });
+    } as unknown as UseQueryResult<CommercialMetrics, Error>);
 
     render(<KpiCards />);
     expect(screen.getByText('Error al cargar métricas')).toBeInTheDocument();
