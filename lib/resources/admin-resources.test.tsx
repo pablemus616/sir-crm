@@ -102,6 +102,49 @@ describe('createEmployeeSchema', () => {
       createEmployeeSchema.safeParse({ firstName: 'Ana', lastName: 'López', email: '' }).success,
     ).toBe(true);
   });
+
+  it('acepta una fila GET con nulls (round-trip de edición) y los omite', () => {
+    // GET /employees/:id devuelve null para columnas nullable sin valor;
+    // ResourceView siembra defaultValues=row, así que RHF retiene null.
+    const result = createEmployeeSchema.safeParse({
+      firstName: 'Ana',
+      lastName: 'López',
+      secondName: null,
+      surName: null,
+      nationalId: null,
+      phoneNumber: null,
+      email: null,
+      birthDate: null,
+      hireDate: null,
+      salary: null,
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.secondName).toBeUndefined();
+      expect(result.data.surName).toBeUndefined();
+      expect(result.data.nationalId).toBeUndefined();
+      expect(result.data.phoneNumber).toBeUndefined();
+      expect(result.data.email).toBeUndefined();
+    }
+  });
+
+  it("convierte campos de texto opcionales '' en undefined (create omite la clave)", () => {
+    const result = createEmployeeSchema.safeParse({
+      firstName: 'Ana',
+      lastName: 'López',
+      secondName: '',
+      surName: '',
+      nationalId: '',
+      phoneNumber: '',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.secondName).toBeUndefined();
+      expect(result.data.surName).toBeUndefined();
+      expect(result.data.nationalId).toBeUndefined();
+      expect(result.data.phoneNumber).toBeUndefined();
+    }
+  });
 });
 
 describe('createPermissionSchema', () => {

@@ -8,14 +8,22 @@ import { emptyToUndefined } from '@/lib/schemas/commercial';
  */
 const optionalDate = z.preprocess(emptyToUndefined, z.string().date().optional());
 
+/**
+ * Optional free-text field. GET /employees/:id returns `null` for unset
+ * `nullable` columns and the create form submits '' for blanks; a bare
+ * `.optional()` rejects both. Preprocess '' / null / undefined → undefined so
+ * create omits the key and edit round-trips a null row.
+ */
+const optionalText = z.preprocess(emptyToUndefined, z.string().trim().optional());
+
 export const createEmployeeSchema = z.object({
   firstName: z.string().trim().min(1, 'El nombre es obligatorio'),
-  secondName: z.string().trim().optional(),
+  secondName: optionalText,
   lastName: z.string().trim().min(1, 'El apellido es obligatorio'),
-  surName: z.string().trim().optional(),
-  nationalId: z.string().trim().optional(),
-  phoneNumber: z.string().trim().optional(),
-  email: z.string().email('Correo inválido').optional().or(z.literal('')),
+  surName: optionalText,
+  nationalId: optionalText,
+  phoneNumber: optionalText,
+  email: z.preprocess(emptyToUndefined, z.string().email('Correo inválido').optional()),
   birthDate: optionalDate,
   hireDate: optionalDate,
   salary: z.preprocess(emptyToUndefined, z.coerce.number().min(0).optional()),
