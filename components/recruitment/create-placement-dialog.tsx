@@ -81,7 +81,7 @@ export function CreatePlacementDialog() {
       <Button onClick={() => setOpen(true)}>Nuevo placement</Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Nuevo placement</DialogTitle>
           </DialogHeader>
