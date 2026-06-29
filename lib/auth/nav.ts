@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   Layers,
+  PhoneCall,
   Shield,
   Tags,
   Target,
@@ -59,6 +60,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Candidatos', href: '/candidates', icon: Users, access: 'auth' },
       { label: 'Aplicaciones', href: '/applications', icon: FileText, access: 'auth' },
       { label: 'Placements', href: '/placements', icon: CheckCircle2, access: 'auth' },
+      { label: 'Interacciones', href: '/candidate-contacts', icon: PhoneCall, access: 'auth' },
     ],
   },
   {
