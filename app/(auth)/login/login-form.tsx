@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -43,6 +44,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
   return (
     <div className="w-full max-w-sm rounded-[var(--radius)] border border-border bg-card p-8 shadow-sm">
       <div className="mb-6 space-y-1 text-center">
+        <Image src="/logo.png" alt="SIR" width={64} height={64} priority className="mx-auto mb-2 h-16 w-16" />
         <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-primary">
           SIR CRM
         </h1>
