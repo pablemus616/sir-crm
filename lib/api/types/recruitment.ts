@@ -94,3 +94,40 @@ export interface Placement {
   status: PlacementStatus;
   createdAt: string;
 }
+
+/* ------------------------------------------------------------------ */
+/* Candidate Contacts                                                  */
+/* ------------------------------------------------------------------ */
+
+export interface CandidateContactRecruiter {
+  id: number;
+  firstName?: string;
+  secondName?: string | null;
+  lastName?: string;
+  surName?: string | null;
+}
+
+export interface CandidateContactCandidate {
+  id: number;
+  firstName: string;
+  secondName?: string | null;
+  lastName: string;
+  surName?: string | null;
+}
+
+export interface CandidateContact {
+  id: number;
+  candidateId: number;
+  opportunityId?: number | null;
+  contactType?: { id: number; name: string } | null;
+  contactTime: string;
+  callLength?: number | null;
+  contactDesc?: string | null;
+  phoneNumberDialed?: string | null;
+  direction?: 'inbound' | 'outbound' | null;
+  recruiterEmployeeId: number;
+  recruiter?: CandidateContactRecruiter | null;
+  candidate?: CandidateContactCandidate | null;
+  opportunity?: { id: number; title?: string | null } | null;
+  createdAt: string;
+}
