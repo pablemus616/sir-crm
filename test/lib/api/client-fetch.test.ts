@@ -8,9 +8,17 @@ const fetchMock = vi.fn()
 beforeEach(() => {
   vi.stubGlobal('fetch', fetchMock)
   fetchMock.mockReset()
+  // jsdom no permite espiar location.assign (no reconfigurable): lo sustituimos.
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { pathname: '/', search: '', assign: vi.fn() },
+  })
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
 
 const jsonRes = (status: number, body: unknown) => ({
   status,
@@ -75,12 +83,13 @@ describe('clientFetch', () => {
     await expect(clientFetch('/clients')).rejects.toBeInstanceOf(ApiError)
   })
 
-  it('lanza ApiError 401 cuando el servidor devuelve 401', async () => {
+  it('lanza ApiError 401 y redirige al login cuando el servidor devuelve 401', async () => {
     fetchMock.mockResolvedValue(jsonRes(401, { ok: false, message: 'No autenticado' }))
     const err = await clientFetch('/me').catch((e: unknown) => e)
     expect(err).toBeInstanceOf(ApiError)
     expect((err as ApiError).status).toBe(401)
     expect((err as ApiError).message).toBe('No autenticado')
+    expect(window.location.assign).toHaveBeenCalledWith(expect.stringContaining('/login?redirect='))
   })
 
   it('lanza ApiError 401 con mensaje por defecto si no hay envelope en 401', async () => {
@@ -89,6 +98,7 @@ describe('clientFetch', () => {
     expect(err).toBeInstanceOf(ApiError)
     expect((err as ApiError).status).toBe(401)
     expect((err as ApiError).message).toBe('No autenticado')
+    expect(window.location.assign).toHaveBeenCalled()
   })
 
   it('lanza ApiError "Respuesta inválida" en respuesta no-JSON para status no-401', async () => {

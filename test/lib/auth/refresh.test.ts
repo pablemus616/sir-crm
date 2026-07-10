@@ -42,7 +42,7 @@ describe('refreshSession', () => {
     expect(clearAuthCookies).not.toHaveBeenCalled()
   })
 
-  it('limpia cookies y devuelve null si el refresh falla', async () => {
+  it('devuelve null SIN limpiar cookies si el refresh falla', async () => {
     vi.mocked(getRefreshToken).mockResolvedValue('old-refresh')
     fetchMock.mockResolvedValue({
       ok: false,
@@ -50,7 +50,9 @@ describe('refreshSession', () => {
       json: async () => ({ ok: false, message: 'expirado' }),
     })
     expect(await refreshSession()).toBeNull()
-    expect(clearAuthCookies).toHaveBeenCalledOnce()
+    // No limpiamos: un fallo puede ser una carrera con un refresh concurrente
+    // válido (p.ej. el proxy); borrar pisaría la cookie buena.
+    expect(clearAuthCookies).not.toHaveBeenCalled()
     expect(setAuthCookies).not.toHaveBeenCalled()
   })
 })

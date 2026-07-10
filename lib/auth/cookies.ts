@@ -1,19 +1,14 @@
 import 'server-only'
 import { cookies } from 'next/headers'
-import { ACCESS_COOKIE, REFRESH_COOKIE } from './cookie-names'
+import {
+  ACCESS_COOKIE,
+  ACCESS_MAX_AGE,
+  REFRESH_COOKIE,
+  REFRESH_MAX_AGE,
+  baseCookieOptions as baseOptions,
+} from './cookie-config'
 
 export { ACCESS_COOKIE, REFRESH_COOKIE }
-
-const isProd = process.env.NODE_ENV === 'production'
-const ACCESS_MAX_AGE = 60 * 15 // 15 min
-const REFRESH_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
-
-const baseOptions = {
-  httpOnly: true,
-  secure: isProd,
-  sameSite: 'lax' as const,
-  path: '/',
-} as const
 
 export async function getAccessToken(): Promise<string | undefined> {
   return (await cookies()).get(ACCESS_COOKIE)?.value

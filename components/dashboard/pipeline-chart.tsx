@@ -26,11 +26,11 @@ import { ChartCard } from './chart-card';
 const chartConfig = {
   count: {
     label: 'Oportunidades',
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1)',
   },
   amount: {
     label: 'Monto Q',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2)',
   },
 } satisfies ChartConfig;
 

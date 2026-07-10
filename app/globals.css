@@ -16,6 +16,9 @@
     --color-sidebar-primary: var(--sidebar-primary);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
+    --color-chart-8: var(--chart-8);
+    --color-chart-7: var(--chart-7);
+    --color-chart-6: var(--chart-6);
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
@@ -76,11 +79,17 @@
     --border: hsl(220 15% 90%);
     --input: hsl(220 15% 90%);
     --ring: hsl(222 47% 20%);
-    --chart-1: hsl(181 25% 47%);
-    --chart-2: hsl(222 47% 20%);
-    --chart-3: hsl(181 26% 72%);
-    --chart-4: hsl(222 30% 35%);
-    --chart-5: hsl(181 30% 35%);
+    /* Paleta categórica de gráficas — 8 tonos distintos, validados colorblind-safe
+       contra la superficie clara (#fff): CVD ΔE mín. 24.2. Valores hex exactos
+       del set validado; se referencian sin envolver: var(--chart-N). */
+    --chart-1: #2a78d6; /* azul */
+    --chart-2: #1baf7a; /* aqua */
+    --chart-3: #eda100; /* ámbar */
+    --chart-4: #008300; /* verde */
+    --chart-5: #4a3aa7; /* violeta */
+    --chart-6: #e34948; /* rojo */
+    --chart-7: #e87ba4; /* magenta */
+    --chart-8: #eb6834; /* naranja */
     --radius: 0.75rem;
     --sidebar: hsl(0 0% 100%);
     --sidebar-foreground: hsl(222 47% 11%);
@@ -119,11 +128,16 @@
     --border: hsl(222 20% 24%);
     --input: hsl(222 20% 24%);
     --ring: hsl(181 26% 72%);
-    --chart-1: hsl(181 25% 47%);
-    --chart-2: hsl(222 47% 20%);
-    --chart-3: hsl(181 26% 72%);
-    --chart-4: hsl(222 30% 35%);
-    --chart-5: hsl(181 30% 35%);
+    /* Mismos 8 tonos escalonados para la superficie oscura (card navy): todos
+       ≥3:1 de contraste; validados como set. No es un flip automático del claro. */
+    --chart-1: #3987e5; /* azul */
+    --chart-2: #199e70; /* aqua */
+    --chart-3: #c98500; /* ámbar */
+    --chart-4: #008300; /* verde */
+    --chart-5: #9085e9; /* violeta */
+    --chart-6: #e66767; /* rojo */
+    --chart-7: #d55181; /* magenta */
+    --chart-8: #d95926; /* naranja */
     --sidebar: hsl(222 47% 9%);
     --sidebar-foreground: hsl(0 0% 98%);
     --sidebar-primary: hsl(181 26% 72%);

@@ -35,6 +35,12 @@ export async function clientFetch<T>(path: string, init: ClientFetchOptions = {}
 
   const envelope = (await res.json().catch(() => null)) as ApiEnvelope<T> | null
   if (res.status === 401) {
+    // La sesión murió (ni el proxy ni el servidor pudieron refrescar): al login,
+    // recordando a dónde iba el usuario. Solo en el navegador y si no está ya ahí.
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      const here = window.location.pathname + window.location.search
+      window.location.assign(`/login?redirect=${encodeURIComponent(here)}`)
+    }
     throw new ApiError(envelope?.message ?? 'No autenticado', 401)
   }
   if (!envelope) throw new ApiError('Respuesta inválida del servidor', res.status)

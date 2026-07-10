@@ -1,5 +1,5 @@
 import 'server-only'
-import { clearAuthCookies, getRefreshToken, setAuthCookies } from './cookies'
+import { getRefreshToken, setAuthCookies } from './cookies'
 import type { ApiEnvelope } from '@/lib/api/types'
 
 interface AuthTokens {
@@ -27,22 +27,17 @@ export async function refreshSession(): Promise<string | null> {
   const envelope = (await res.json().catch(() => null)) as ApiEnvelope<AuthTokens> | null
 
   if (!res.ok || !envelope || !envelope.ok) {
-    await safeClear()
+    // No limpiamos: un fallo aquí puede ser una carrera con un refresh concurrente
+    // válido (p.ej. el proxy). Borrar pisaría la cookie buena. La sesión muerta
+    // termina en /login por getMe / el redirect del cliente.
     return null
   }
 
   try {
     await setAuthCookies(envelope.data.accessToken, envelope.data.refreshToken)
   } catch {
-    // Contexto de render: no se puede persistir; el token se usa para el reintento.
+    // Contexto de render: no se puede persistir. Con el proxy refrescando antes del
+    // render esto casi no ocurre; si ocurre, el token sirve para el reintento en vuelo.
   }
   return envelope.data.accessToken
-}
-
-async function safeClear(): Promise<void> {
-  try {
-    await clearAuthCookies()
-  } catch {
-    // ignorar en contextos no mutables
-  }
 }

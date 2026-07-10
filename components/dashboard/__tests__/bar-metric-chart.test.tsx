@@ -62,7 +62,7 @@ describe('BarMetricChart', () => {
     );
     const styleTag = container.querySelector('style');
     expect(styleTag?.textContent).toContain('--color-count');
-    expect(styleTag?.textContent).toContain('hsl(var(--chart-1))');
+    expect(styleTag?.textContent).toContain('var(--chart-1)');
   });
 
   it('renderiza sin datos sin lanzar error', () => {
