@@ -32,6 +32,9 @@ export const usePipeline = (f: MetricsFilters) =>
   useMetric<PipelineStageMetric[]>('pipeline', 'pipeline', f);
 export const useContacts = (f: MetricsFilters) =>
   useMetric<ContactMetric[]>('contacts', 'contacts', f);
+/** Interacciones con candidatos por tipo (reclutamiento), no el historial comercial. */
+export const useCandidateInteractions = (f: MetricsFilters) =>
+  useMetric<ContactMetric[]>('candidate-contacts', 'candidate-contacts', f);
 export const useRequests = (f: MetricsFilters) =>
   useMetric<RequestsMetrics>('requests', 'requests', f);
 export const useRecruitmentFunnel = (f: MetricsFilters) =>

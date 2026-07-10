@@ -96,7 +96,7 @@ esté mal). Los endpoints viven en `sir-api` → `src/metrics/`.
 |---|---|---|
 | **Pipeline por etapa** | `/metrics/pipeline` | Oportunidades agrupadas por etapa (conteo + monto). Se alimenta al **mover oportunidades de etapa**. |
 | **Embudo de reclutamiento** | `/metrics/recruitment/funnel` | Aplicaciones agrupadas por etapa del embudo. Se alimenta al **crear aplicaciones y avanzarlas de etapa**. |
-| **Contactos por tipo** | `/metrics/contacts` | Interacciones agrupadas por tipo/dirección (conteo, duración total y promedio). Se alimenta al **registrar historial de contacto**. |
+| **Interacciones por tipo** | `/metrics/candidate-contacts` | Interacciones **con candidatos** agrupadas por tipo/dirección (conteo, duración total y promedio). Se alimenta al **registrar interacciones con candidatos** (módulo Interacciones), no del historial comercial. |
 | **Colocaciones por reclutador** | `/metrics/placements` | Por reclutador y cliente: conteo, suma de honorarios y **tiempo promedio de cierre** (`placementDate − opportunity.createdAt`). Se alimenta al **registrar colocaciones**. |
 | **Oportunidades por cliente / sector / área** | `/metrics/charts/by-client` · `by-sector` · `by-area` | Por cada dimensión: oportunidades (conteo), ganadas (conteo) y monto ganado. Se alimenta al **crear y ganar oportunidades** (el sector viene del cliente; el área, de la oportunidad). |
 

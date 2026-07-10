@@ -1,6 +1,6 @@
 'use client';
 
-import { useContacts } from '@/lib/api/metrics';
+import { useCandidateInteractions } from '@/lib/api/metrics';
 import { useDashboardFilters } from '@/lib/dashboard/use-dashboard-filters';
 import type { ContactMetric } from '@/lib/api/metrics-types';
 import { ChartCard } from './chart-card';
@@ -24,21 +24,21 @@ export function groupContacts(data: ContactMetric[]): GroupedContact[] {
   }));
 }
 
-const SERIES = [{ key: 'count', label: 'Contactos' }] as const;
+const SERIES = [{ key: 'count', label: 'Interacciones' }] as const;
 
 /**
- * Gráfica de contactos agrupados por tipo de contacto.
- * Reacts to URL filters via useDashboardFilters.
+ * Gráfica de interacciones con candidatos agrupadas por tipo de contacto
+ * (reclutamiento), NO el historial comercial. Reacciona a los filtros de URL.
  */
 export function ContactsChart() {
   const { filters } = useDashboardFilters();
-  const { data, isPending, isError, error } = useContacts(filters);
+  const { data, isPending, isError, error } = useCandidateInteractions(filters);
 
   const grouped = data ? groupContacts(data) : [];
 
   return (
     <ChartCard
-      title="Contactos por tipo"
+      title="Interacciones por tipo"
       isPending={isPending}
       isError={isError}
       error={error as Error | null}

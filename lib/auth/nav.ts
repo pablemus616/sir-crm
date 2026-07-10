@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Briefcase,
   Building2,
   CheckCircle2,
@@ -40,7 +41,10 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'General',
     access: 'auth',
-    items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, access: 'auth' }],
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, access: 'auth' },
+      { label: 'Guía', href: '/guia', icon: BookOpen, access: 'auth' },
+    ],
   },
   {
     label: 'Comercial',

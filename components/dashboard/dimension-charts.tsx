@@ -18,6 +18,7 @@ interface DimensionChartProps {
   isError: boolean;
   error: unknown;
   categoryKey: string;
+  emptyLabel: string;
 }
 
 function DimensionChart({
@@ -27,7 +28,14 @@ function DimensionChart({
   isError,
   error,
   categoryKey,
+  emptyLabel,
 }: DimensionChartProps) {
+  // Etiqueta las filas sin dimensión (p.ej. oportunidades sin área asignada) en
+  // vez de dejar una barra con etiqueta en blanco.
+  const rows = (data ?? []).map((d) => ({
+    ...d,
+    [categoryKey]: (d as unknown as Record<string, unknown>)[categoryKey] ?? emptyLabel,
+  }));
   return (
     <ChartCard
       title={title}
@@ -37,7 +45,7 @@ function DimensionChart({
       isEmpty={!isPending && !isError && (!data || data.length === 0)}
     >
       <BarMetricChart
-        data={data ?? []}
+        data={rows}
         categoryKey={categoryKey}
         series={[...OPPORTUNITY_SERIES]}
       />
@@ -65,6 +73,7 @@ export function DimensionCharts() {
         isError={byClient.isError}
         error={byClient.error}
         categoryKey="clientName"
+        emptyLabel="Sin cliente"
       />
       <DimensionChart
         title="Oportunidades por sector"
@@ -73,6 +82,7 @@ export function DimensionCharts() {
         isError={bySector.isError}
         error={bySector.error}
         categoryKey="sectorName"
+        emptyLabel="Sin sector"
       />
       <DimensionChart
         title="Oportunidades por área"
@@ -81,6 +91,7 @@ export function DimensionCharts() {
         isError={byArea.isError}
         error={byArea.error}
         categoryKey="areaName"
+        emptyLabel="Sin área"
       />
     </>
   );
