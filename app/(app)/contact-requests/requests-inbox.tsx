@@ -60,7 +60,7 @@ function RequestList({ wasHandled }: { wasHandled?: boolean }) {
               )}
               {r.wasHandled && r.resultingClientId && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Cliente vinculado: #{r.resultingClientId}
+                  Cliente vinculado: {r.resultingClient?.name ?? `#${r.resultingClientId}`}
                 </p>
               )}
             </div>

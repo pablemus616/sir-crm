@@ -6,50 +6,34 @@ import { toast } from "sonner";
 import { createQueryWrapper } from "@/lib/test/query-wrapper";
 import { ResourceForm } from "./resource-form";
 
-// ── Mock shadcn Select with native HTML so jsdom can interact without portals ──
+// ── Mock the Combobox with native HTML so jsdom can interact without portals ──
+// The real Combobox renders options inside a base-ui Popover portal that only
+// mounts on open; this shim exposes each option as a role="option" button and
+// forwards the click through onChange, mirroring the real API.
 
-vi.mock("@/components/ui/select", () => {
-  type SelectCtxT = { value: string; onValueChange: (v: string) => void };
-  const SelectCtx = React.createContext<SelectCtxT>({ value: "", onValueChange: () => {} });
-
-  return {
-    Select: ({
-      value,
-      onValueChange,
-      children,
-    }: {
-      value: string;
-      onValueChange: (v: string) => void;
-      children: React.ReactNode;
-    }) => (
-      <SelectCtx.Provider value={{ value, onValueChange }}>
-        <div data-testid="select-root">{children}</div>
-      </SelectCtx.Provider>
-    ),
-    SelectTrigger: () => null,
-    SelectValue: () => null,
-    SelectContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    SelectItem: ({
-      value,
-      children,
-    }: {
-      value: string;
-      children: React.ReactNode;
-    }) => {
-      const { onValueChange } = React.useContext(SelectCtx);
-      return (
+vi.mock("@/components/ui/combobox", () => ({
+  Combobox: ({
+    options,
+    onChange,
+  }: {
+    options: { label: string; value: string }[];
+    onChange: (v: string | undefined) => void;
+  }) => (
+    <div data-testid="combobox">
+      {options.map((o) => (
         <button
+          key={o.value}
           type="button"
           role="option"
-          data-value={value}
-          onClick={() => onValueChange(value)}
+          data-value={o.value}
+          onClick={() => onChange(o.value)}
         >
-          {children}
+          {o.label}
         </button>
-      );
-    },
-  };
-});
+      ))}
+    </div>
+  ),
+}));
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 

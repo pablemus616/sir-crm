@@ -14,4 +14,6 @@ export interface Me {
   username: string
   roles: MeRole[]
   employee: MeEmployee | null
+  /** Effective permission strings (`module:action`, plus `module:read:own`). */
+  permissions: string[]
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -18,8 +19,6 @@ import { useList } from '@/lib/api/hooks';
 import { contactDirectionLabels } from '@/lib/domain/commercial-labels';
 import type { ClientContact, ContactDirection } from '@/lib/api/types/commercial';
 
-const selectClass = 'w-full rounded-md border border-input bg-background p-2 text-sm';
-
 export function LogContactForm({
   open,
   onOpenChange,
@@ -28,10 +27,11 @@ export function LogContactForm({
   onOpenChange: (o: boolean) => void;
 }) {
   const log = useLogContact();
-  const contacts = useList<ClientContact>('client-contacts', { limit: 100 });
-  const contactTypes = useList<{ id: number; name: string }>('contact-types', { limit: 100 });
+  const contacts = useList<ClientContact>('client-contacts', { limit: 1000 });
+  const contactTypes = useList<{ id: number; name: string }>('contact-types', { limit: 1000 });
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setValue,
@@ -59,14 +59,21 @@ export function LogContactForm({
             <Label htmlFor="contactId">
               Contacto <span className="text-destructive">*</span>
             </Label>
-            <select id="contactId" className={selectClass} {...register('contactId')}>
-              <option value="">Selecciona…</option>
-              {contacts.data?.items.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="contactId"
+              render={({ field }) => (
+                <Combobox
+                  id="contactId"
+                  options={(contacts.data?.items ?? []).map((c) => ({ label: c.name, value: String(c.id) }))}
+                  value={field.value}
+                  onChange={(v) => field.onChange(v == null ? undefined : Number(v))}
+                  loading={contacts.isLoading}
+                  placeholder="Selecciona…"
+                  searchPlaceholder="Buscar contacto…"
+                />
+              )}
+            />
             {errors.contactId && <p className="text-xs text-destructive">Selecciona un contacto.</p>}
           </div>
 
@@ -74,14 +81,21 @@ export function LogContactForm({
             <Label htmlFor="contactType">
               Tipo de contacto <span className="text-destructive">*</span>
             </Label>
-            <select id="contactType" className={selectClass} {...register('contactType')}>
-              <option value="">Selecciona…</option>
-              {contactTypes.data?.items.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="contactType"
+              render={({ field }) => (
+                <Combobox
+                  id="contactType"
+                  options={(contactTypes.data?.items ?? []).map((t) => ({ label: t.name, value: String(t.id) }))}
+                  value={field.value}
+                  onChange={(v) => field.onChange(v == null ? undefined : Number(v))}
+                  loading={contactTypes.isLoading}
+                  placeholder="Selecciona…"
+                  searchPlaceholder="Buscar tipo…"
+                />
+              )}
+            />
             {errors.contactType && (
               <p className="text-xs text-destructive">Selecciona un tipo de contacto.</p>
             )}
@@ -109,18 +123,25 @@ export function LogContactForm({
 
           <div className="space-y-1">
             <Label htmlFor="direction">Dirección (opcional)</Label>
-            <select
-              id="direction"
-              className={selectClass}
-              {...register('direction', { setValueAs: (v) => (v === '' ? undefined : v) })}
-            >
-              <option value="">Sin especificar</option>
-              {(Object.keys(contactDirectionLabels) as ContactDirection[]).map((d) => (
-                <option key={d} value={d}>
-                  {contactDirectionLabels[d]}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="direction"
+              render={({ field }) => (
+                <Combobox
+                  id="direction"
+                  options={(Object.keys(contactDirectionLabels) as ContactDirection[]).map((d) => ({
+                    label: contactDirectionLabels[d],
+                    value: d,
+                  }))}
+                  value={field.value ?? undefined}
+                  onChange={(v) => field.onChange((v || undefined) as ContactDirection | undefined)}
+                  clearable
+                  clearLabel="Sin especificar"
+                  placeholder="Sin especificar"
+                  searchPlaceholder="Buscar dirección…"
+                />
+              )}
+            />
             {errors.direction && (
               <p className="text-xs text-destructive">Dirección inválida.</p>
             )}

@@ -8,13 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
 import {
   Form,
   FormControl,
@@ -55,41 +49,23 @@ function DynamicSelectField({
   const getValue =
     field.optionValue ?? ((item: unknown) => (item as { id: number }).id);
 
-  const query = useList<unknown>(field.optionsEndpoint!, { limit: 100 });
+  // Fetch a generous page so the full catalog is searchable client-side (the old
+  // 100-row cap could hide valid options on large lists).
+  const query = useList<unknown>(field.optionsEndpoint!, { limit: 1000 });
   const options = (query.data?.items ?? []).map((item) => ({
-    label: getLabel(item),
+    label: String(getLabel(item)),
     value: String(getValue(item)),
   }));
 
-  // Base UI necesita `items` (value→label) en el Root para mostrar el label en el
-  // trigger cuando está cerrado; sin esto el trigger mostraba el id.
-  const items: Record<string, string> = {};
-  for (const opt of options) items[opt.value] = String(opt.label);
-
-  const id = field.name;
   return (
-    <Select
-      items={items}
-      value={rhf.value != null ? String(rhf.value) : ""}
-      onValueChange={(value) => rhf.onChange(value)}
-    >
-      <SelectTrigger id={id}>
-        <SelectValue placeholder={field.placeholder ?? "Seleccionar…"} />
-      </SelectTrigger>
-      <SelectContent>
-        {query.isLoading ? (
-          <SelectItem value="__loading__" disabled>
-            Cargando…
-          </SelectItem>
-        ) : (
-          options.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </SelectItem>
-          ))
-        )}
-      </SelectContent>
-    </Select>
+    <Combobox
+      id={field.name}
+      options={options}
+      value={rhf.value as string | number | null | undefined}
+      onChange={(value) => rhf.onChange(value)}
+      loading={query.isLoading}
+      placeholder={field.placeholder ?? "Seleccionar…"}
+    />
   );
 }
 
@@ -214,25 +190,18 @@ function renderControl(field: FieldConfig, rhf: RhfField) {
         />
       );
     case "select": {
-      const selectItems: Record<string, string> = {};
-      for (const opt of field.options ?? []) selectItems[String(opt.value)] = String(opt.label);
+      const options = (field.options ?? []).map((opt) => ({
+        label: String(opt.label),
+        value: String(opt.value),
+      }));
       return (
-        <Select
-          items={selectItems}
-          value={rhf.value != null ? String(rhf.value) : ""}
-          onValueChange={(value) => rhf.onChange(value)}
-        >
-          <SelectTrigger id={id}>
-            <SelectValue placeholder={field.placeholder ?? "Seleccionar…"} />
-          </SelectTrigger>
-          <SelectContent>
-            {(field.options ?? []).map((opt) => (
-              <SelectItem key={String(opt.value)} value={String(opt.value)}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Combobox
+          id={id}
+          options={options}
+          value={rhf.value as string | number | null | undefined}
+          onChange={(value) => rhf.onChange(value)}
+          placeholder={field.placeholder ?? "Seleccionar…"}
+        />
       );
     }
     case "date":

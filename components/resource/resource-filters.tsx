@@ -28,7 +28,7 @@ function DynamicSelectFilter({
   const getValue =
     filter.optionValue ??
     ((item: unknown) => (item as { id: number }).id);
-  const query = useList<unknown>(filter.optionsEndpoint!, { limit: 100 });
+  const query = useList<unknown>(filter.optionsEndpoint!, { limit: 1000 });
   const options = (query.data?.items ?? []).map((item) => ({
     label: getLabel(item),
     value: String(getValue(item)),

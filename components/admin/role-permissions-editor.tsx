@@ -5,13 +5,7 @@ import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { useList } from '@/lib/api/hooks';
 import {
   useRoleDetail,
@@ -49,9 +43,6 @@ export function RolePermissionsEditor({ roleId }: { roleId: number }) {
   const assignedIds = new Set(assigned.map((p) => p.id));
   const available = (permissions.data?.items ?? []).filter((p) => !assignedIds.has(p.id));
 
-  const permissionItems: Record<string, string> = {};
-  for (const p of available) permissionItems[String(p.id)] = p.name;
-
   const handleAssign = () => {
     if (!selected) return;
     assign.mutate(
@@ -86,22 +77,16 @@ export function RolePermissionsEditor({ roleId }: { roleId: number }) {
       )}
 
       <div className="flex items-center gap-2">
-        <Select
-          items={permissionItems}
+        <Combobox
+          options={available.map((p) => ({ label: p.name, value: String(p.id) }))}
           value={selected}
-          onValueChange={(v) => setSelected(v ?? '')}
-        >
-          <SelectTrigger className="w-full" aria-label="Agregar permiso">
-            <SelectValue placeholder="Agregar permiso…" />
-          </SelectTrigger>
-          <SelectContent>
-            {available.map((p) => (
-              <SelectItem key={p.id} value={String(p.id)}>
-                {p.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={(v) => setSelected(v ?? '')}
+          loading={permissions.isLoading}
+          placeholder="Agregar permiso…"
+          searchPlaceholder="Buscar permiso…"
+          emptyText="No hay permisos disponibles."
+          triggerClassName="w-full"
+        />
         <Button
           type="button"
           onClick={handleAssign}

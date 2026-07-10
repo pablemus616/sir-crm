@@ -20,23 +20,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useList } from '@/lib/api/hooks';
 import { useCreateUser, useUpdateUser } from '@/lib/api/users';
 import { createUserSchema, updateUserSchema, type CreateUserInput } from '@/lib/schemas/admin';
 import type { Employee, User } from '@/lib/api/types/admin';
-
-/** Centinela para el item placeholder (cargando / vacío): base-ui Select exige
- *  un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
-const PLACEHOLDER = '__placeholder__';
 
 interface UserFormDialogProps {
   open: boolean;
@@ -92,10 +82,6 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
       create.mutate(values, { onSuccess: handleClose });
     }
   };
-
-  const employeeItems: Record<string, string> = {};
-  for (const e of employees.data?.items ?? [])
-    employeeItems[String(e.id)] = `${e.firstName} ${e.lastName}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,38 +159,25 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
                     Empleado <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Select
-                      items={employeeItems}
-                      value={field.value != null ? String(field.value) : ''}
-                      onValueChange={(v) =>
+                    <Combobox
+                      options={(employees.data?.items ?? []).map((e) => ({
+                        label: `${e.firstName} ${e.lastName}`,
+                        value: String(e.id),
+                      }))}
+                      value={field.value}
+                      onChange={(v) =>
                         field.onChange(v == null ? undefined : Number(v))
                       }
-                    >
-                      <SelectTrigger className="w-full" aria-required>
-                        <SelectValue placeholder="Selecciona un empleado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {employees.isLoading ? (
-                          <SelectItem value={PLACEHOLDER} disabled>
-                            Cargando…
-                          </SelectItem>
-                        ) : employees.isError ? (
-                          <SelectItem value={PLACEHOLDER} disabled>
-                            No se pudieron cargar los empleados.
-                          </SelectItem>
-                        ) : (employees.data?.items.length ?? 0) === 0 ? (
-                          <SelectItem value={PLACEHOLDER} disabled>
-                            No hay empleados disponibles
-                          </SelectItem>
-                        ) : (
-                          employees.data?.items.map((e) => (
-                            <SelectItem key={e.id} value={String(e.id)}>
-                              {`${e.firstName} ${e.lastName}`}
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
+                      loading={employees.isLoading}
+                      placeholder="Selecciona un empleado"
+                      searchPlaceholder="Buscar empleado…"
+                      emptyText={
+                        employees.isError
+                          ? 'No se pudieron cargar los empleados.'
+                          : 'No hay empleados disponibles.'
+                      }
+                      triggerClassName="w-full"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

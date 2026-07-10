@@ -10,9 +10,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import type { Me } from '@/lib/auth/types'
 import { NavLinks } from './nav-links'
 
-export function MobileNav({ admin }: { admin: boolean }) {
+export function MobileNav({ me }: { me: Me }) {
   const [open, setOpen] = useState(false)
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -35,7 +36,7 @@ export function MobileNav({ admin }: { admin: boolean }) {
           </SheetTitle>
         </SheetHeader>
         <div className="overflow-y-auto p-3">
-          <NavLinks admin={admin} onNavigate={() => setOpen(false)} />
+          <NavLinks me={me} onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

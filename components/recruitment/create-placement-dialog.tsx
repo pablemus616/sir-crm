@@ -19,13 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,15 +35,10 @@ import {
   applicationStageLabels,
 } from '@/lib/domain/recruitment-labels';
 
-/** Centinela para el item "Sin estado": base-ui Select nunca emite '' al
- *  seleccionar, así que mapeamos esta opción a undefined para volver al default
- *  del servidor. */
-const NO_STATUS = '__none__';
-
 export function CreatePlacementDialog() {
   const [open, setOpen] = useState(false);
   const create = useCreatePlacement();
-  const applications = useApplications({ limit: 200 });
+  const applications = useApplications({ limit: 1000 });
 
   const form = useForm<CreatePlacementInput>({
     resolver: zodResolver(createPlacementSchema),
@@ -63,18 +52,27 @@ export function CreatePlacementDialog() {
       },
     });
 
-  const applicationItems: Record<string, string> = {};
-  for (const a of (applications.data?.items ?? []).filter(
-    (a) => a.stage !== 'rejected' && a.stage !== 'withdrawn',
-  ))
-    applicationItems[String(a.id)] = `${a.candidate?.firstName ?? 'Candidato'} ${
-      a.candidate?.lastName ?? `#${a.candidateId}`
-    } — ${
-      a.opportunity?.title ?? `Oportunidad #${a.opportunityId}`
-    } (${applicationStageLabels[a.stage]})`;
+  const applicationOptions = (applications.data?.items ?? [])
+    // 'hired' ya tiene placement; 'rejected'/'withdrawn' no son colocables.
+    .filter(
+      (a) =>
+        a.stage !== 'rejected' &&
+        a.stage !== 'withdrawn' &&
+        a.stage !== 'hired',
+    )
+    .map((a) => ({
+      value: String(a.id),
+      label: `${a.candidate?.firstName ?? 'Candidato'} ${
+        a.candidate?.lastName ?? `#${a.candidateId}`
+      } — ${
+        a.opportunity?.title ?? `Oportunidad #${a.opportunityId}`
+      } (${applicationStageLabels[a.stage]})`,
+    }));
 
-  const statusItems: Record<string, string> = {};
-  for (const s of PLACEMENT_STATUSES) statusItems[s] = placementStatusLabels[s];
+  const statusOptions = PLACEMENT_STATUSES.map((s) => ({
+    value: s,
+    label: placementStatusLabels[s],
+  }));
 
   return (
     <>
@@ -97,35 +95,17 @@ export function CreatePlacementDialog() {
                       Aplicación <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Select
-                        items={applicationItems}
-                        value={field.value != null ? String(field.value) : ''}
-                        onValueChange={(v) =>
+                      <Combobox
+                        options={applicationOptions}
+                        value={field.value}
+                        onChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
                         }
-                      >
-                        <SelectTrigger className="w-full" aria-required>
-                          <SelectValue placeholder="Selecciona una aplicación" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {applications.data?.items
-                            .filter(
-                              (a) =>
-                                a.stage !== 'rejected' &&
-                                a.stage !== 'withdrawn',
-                            )
-                            .map((a) => (
-                            <SelectItem key={a.id} value={String(a.id)}>
-                              {`${a.candidate?.firstName ?? 'Candidato'} ${
-                                a.candidate?.lastName ?? `#${a.candidateId}`
-                              } — ${
-                                a.opportunity?.title ??
-                                `Oportunidad #${a.opportunityId}`
-                              } (${applicationStageLabels[a.stage]})`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        loading={applications.isLoading}
+                        placeholder="Selecciona una aplicación"
+                        searchPlaceholder="Buscar aplicación…"
+                        triggerClassName="w-full"
+                      />
                     </FormControl>
                     <FormDescription>
                       Al registrar el placement la aplicación pasa a Contratado.
@@ -278,27 +258,16 @@ export function CreatePlacementDialog() {
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
                     <FormControl>
-                      <Select
-                        items={statusItems}
-                        value={field.value ?? ''}
-                        onValueChange={(v) =>
-                          field.onChange(
-                            v == null || v === NO_STATUS ? undefined : v,
-                          )
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona un estado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NO_STATUS}>Sin estado</SelectItem>
-                          {PLACEMENT_STATUSES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {placementStatusLabels[s]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={statusOptions}
+                        value={field.value ?? undefined}
+                        onChange={(v) => field.onChange(v ?? undefined)}
+                        clearable
+                        clearLabel="Sin estado"
+                        placeholder="Selecciona un estado"
+                        searchPlaceholder="Buscar estado…"
+                        triggerClassName="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

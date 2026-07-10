@@ -14,13 +14,13 @@ import type { Me } from '@/lib/auth/types'
 import { MobileNav } from './mobile-nav'
 import { UserMenu } from './user-menu'
 
-export function Topbar({ me, admin }: { me: Me; admin: boolean }) {
+export function Topbar({ me }: { me: Me }) {
   const pathname = usePathname()
   const current = labelForHref(pathname)
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur">
-      <MobileNav admin={admin} />
+      <MobileNav me={me} />
       <Breadcrumb className="hidden sm:block">
         <BreadcrumbList>
           <BreadcrumbItem>

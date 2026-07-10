@@ -66,6 +66,8 @@ export function useCreatePlacement() {
       qc.invalidateQueries({ queryKey: ['placements'] });
       qc.invalidateQueries({ queryKey: ['opportunities'] });
       qc.invalidateQueries({ queryKey: ['applications'] });
+      // El candidato queda colocado: ya no está "disponible".
+      qc.invalidateQueries({ queryKey: ['candidates'] });
     },
     onError: (e) => toast.error(toSpanishError(e, 'No se pudo registrar el placement')),
   });

@@ -12,7 +12,11 @@ interface GroupedPlacement {
   totalFee: number;
 }
 
-/** Agrupa PlacementMetric[] por reclutador, sumando colocaciones y honorarios. Función pura. */
+/**
+ * Agrupa PlacementMetric[] por reclutador, sumando colocaciones y honorarios de
+ * todos sus clientes. Función pura. El nombre viene resuelto del backend
+ * (`recruiterName`); si falta, se cae a "Reclutador #id".
+ */
 export function groupPlacements(data: PlacementMetric[]): GroupedPlacement[] {
   const map = new Map<number, GroupedPlacement>();
   for (const row of data) {
@@ -22,7 +26,7 @@ export function groupPlacements(data: PlacementMetric[]): GroupedPlacement[] {
       existing.totalFee += row.totalFee;
     } else {
       map.set(row.recruiterId, {
-        recruiterLabel: `Reclutador ${row.recruiterId}`,
+        recruiterLabel: row.recruiterName || `Reclutador #${row.recruiterId}`,
         count: row.count,
         totalFee: row.totalFee,
       });

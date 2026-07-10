@@ -3,8 +3,14 @@ import { labelForHref, visibleGroups } from '@/lib/auth/nav'
 import { hasRole, isAdmin } from '@/lib/auth/roles'
 import type { Me } from '@/lib/auth/types'
 
-const base: Pick<Me, 'roles'> = { roles: [{ id: '1', name: 'auth' }] }
-const admin: Pick<Me, 'roles'> = { roles: [{ id: '2', name: 'ADMIN' }] }
+const base: Pick<Me, 'roles' | 'permissions'> = {
+  roles: [{ id: '1', name: 'auth' }],
+  permissions: ['opportunities:read', 'clients:read', 'candidates:read'],
+}
+const admin: Pick<Me, 'roles' | 'permissions'> = {
+  roles: [{ id: '2', name: 'ADMIN' }],
+  permissions: [],
+}
 
 describe('roles', () => {
   it('hasRole es case-insensitive', () => {
@@ -19,13 +25,13 @@ describe('roles', () => {
 
 describe('visibleGroups', () => {
   it('oculta Catálogos y Admin a no-admin', () => {
-    const labels = visibleGroups(false).map((g) => g.label)
+    const labels = visibleGroups(base).map((g) => g.label)
     expect(labels).toContain('Comercial')
     expect(labels).not.toContain('Admin')
     expect(labels).not.toContain('Catálogos')
   })
   it('muestra todos los grupos a admin', () => {
-    const labels = visibleGroups(true).map((g) => g.label)
+    const labels = visibleGroups(admin).map((g) => g.label)
     expect(labels).toContain('Admin')
     expect(labels).toContain('Catálogos')
   })

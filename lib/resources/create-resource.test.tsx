@@ -4,6 +4,13 @@ import { createQueryWrapper } from "@/lib/test/query-wrapper";
 import { ResourceView } from "@/components/resource/resource-view";
 import { sectorsResource, sectorSchema } from "./__fixtures__/sectors.resource";
 
+// La vista se prueba sin la capa de permisos: el usuario es admin (bypass total).
+vi.mock("@/lib/api/hooks/use-me", () => ({
+  useMe: () => ({
+    data: { id: 1, username: "admin", employeeId: 1, roles: [{ id: "1", name: "admin" }], permissions: [] },
+  }),
+}));
+
 function mockList(items: unknown[]) {
   vi.stubGlobal(
     "fetch",

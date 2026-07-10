@@ -1,5 +1,6 @@
 'use client';
 
+import { FilterSelect } from '@/components/dashboard/filter-select';
 import { useList } from '@/lib/api/hooks';
 import { opportunityStatusLabels } from '@/lib/domain/commercial-labels';
 import type { Client, PipelineStage, OpportunityStatus } from '@/lib/api/types/commercial';
@@ -21,99 +22,59 @@ export function OpportunityFilters({
   value: OppFilters;
   onChange: (next: OppFilters) => void;
 }) {
-  const clients = useList<Client>('clients', { limit: 100 });
-  const sectors = useList('sectors', { limit: 100 });
-  const areas = useList('position-areas', { limit: 100 });
-  const stages = useList<PipelineStage>('pipeline-stages', { limit: 100 });
+  const clients = useList<Client>('clients', { limit: 1000 });
+  const sectors = useList('sectors', { limit: 1000 });
+  const areas = useList('position-areas', { limit: 1000 });
+  const stages = useList<PipelineStage>('pipeline-stages', { limit: 1000 });
   const employees = useList<{ id: number; firstName?: string; lastName?: string }>(
     'employees',
-    { limit: 100 },
+    { limit: 1000 },
   );
 
   const set = (patch: Partial<OppFilters>) => onChange({ ...value, ...patch });
-  const num = (v: string) => (v ? Number(v) : undefined);
+  const num = (v: string | undefined) => (v ? Number(v) : undefined);
 
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.clientId ?? ''}
-        onChange={(e) => set({ clientId: num(e.target.value) })}
-      >
-        <option value="">Todos los clientes</option>
-        {clients.data?.items.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.sectorId ?? ''}
-        onChange={(e) => set({ sectorId: num(e.target.value) })}
-      >
-        <option value="">Todos los sectores</option>
-        {sectors.data?.items.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.areaId ?? ''}
-        onChange={(e) => set({ areaId: num(e.target.value) })}
-      >
-        <option value="">Todas las áreas</option>
-        {areas.data?.items.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.stageId ?? ''}
-        onChange={(e) => set({ stageId: num(e.target.value) })}
-      >
-        <option value="">Todas las etapas</option>
-        {stages.data?.items.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.status ?? ''}
-        onChange={(e) =>
-          set({ status: (e.target.value || undefined) as OpportunityStatus | undefined })
-        }
-      >
-        <option value="">Todos los estados</option>
-        {Object.entries(opportunityStatusLabels).map(([k, l]) => (
-          <option key={k} value={k}>
-            {l}
-          </option>
-        ))}
-      </select>
-
-      <select
-        className="rounded-md border border-input bg-background p-2 text-sm"
-        value={value.responsibleEmployeeId ?? ''}
-        onChange={(e) => set({ responsibleEmployeeId: num(e.target.value) })}
-      >
-        <option value="">Todos los responsables</option>
-        {employees.data?.items.map((e) => (
-          <option key={e.id} value={e.id}>
-            {[e.firstName, e.lastName].filter(Boolean).join(' ') || `#${e.id}`}
-          </option>
-        ))}
-      </select>
+      <FilterSelect
+        placeholder="Cliente"
+        value={value.clientId}
+        options={(clients.data?.items ?? []).map((c) => ({ value: String(c.id), label: c.name }))}
+        onChange={(v) => set({ clientId: num(v) })}
+      />
+      <FilterSelect
+        placeholder="Sector"
+        value={value.sectorId}
+        options={(sectors.data?.items ?? []).map((s) => ({ value: String(s.id), label: s.name }))}
+        onChange={(v) => set({ sectorId: num(v) })}
+      />
+      <FilterSelect
+        placeholder="Área"
+        value={value.areaId}
+        options={(areas.data?.items ?? []).map((a) => ({ value: String(a.id), label: a.name }))}
+        onChange={(v) => set({ areaId: num(v) })}
+      />
+      <FilterSelect
+        placeholder="Etapa"
+        value={value.stageId}
+        options={(stages.data?.items ?? []).map((s) => ({ value: String(s.id), label: s.name }))}
+        onChange={(v) => set({ stageId: num(v) })}
+      />
+      <FilterSelect
+        placeholder="Estado"
+        value={value.status}
+        options={Object.entries(opportunityStatusLabels).map(([k, l]) => ({ value: k, label: l }))}
+        onChange={(v) => set({ status: (v || undefined) as OpportunityStatus | undefined })}
+      />
+      <FilterSelect
+        placeholder="Responsable"
+        value={value.responsibleEmployeeId}
+        options={(employees.data?.items ?? []).map((e) => ({
+          value: String(e.id),
+          label: [e.firstName, e.lastName].filter(Boolean).join(' ') || `#${e.id}`,
+        }))}
+        onChange={(v) => set({ responsibleEmployeeId: num(v) })}
+      />
 
       <label className="flex items-center gap-2 text-sm text-foreground">
         <input

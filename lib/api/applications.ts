@@ -54,6 +54,8 @@ export function useCreateApplication() {
     onSuccess: () => {
       toast.success('Aplicación creada');
       qc.invalidateQueries({ queryKey: KEY });
+      // El candidato deja de estar "disponible" tras aplicar: refrescar su lista.
+      qc.invalidateQueries({ queryKey: ['candidates'] });
     },
     onError: (e) => toast.error(toSpanishError(e, 'No se pudo crear la aplicación')),
   });

@@ -5,20 +5,10 @@ import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { useList } from '@/lib/api/hooks';
 import { useUserDetail, useAssignRole, useRemoveRole } from '@/lib/api/users';
 import type { Role } from '@/lib/api/types/admin';
-
-/** Centinela para el item placeholder (cargando / vacío): base-ui Select exige
- *  un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
-const PLACEHOLDER = '__placeholder__';
 
 /**
  * Editor M:N de roles de un usuario. Trae el usuario fresco (useUserDetail) para
@@ -47,9 +37,6 @@ export function UserRolesEditor({ userId }: { userId: number }) {
   const assigned = user.roles ?? [];
   const assignedIds = new Set(assigned.map((r) => r.id));
   const available = (roles.data?.items ?? []).filter((r) => !assignedIds.has(r.id));
-
-  const roleItems: Record<string, string> = {};
-  for (const r of available) roleItems[String(r.id)] = r.name;
 
   const handleAssign = () => {
     if (!selected) return;
@@ -85,32 +72,16 @@ export function UserRolesEditor({ userId }: { userId: number }) {
       )}
 
       <div className="flex items-center gap-2">
-        <Select
-          items={roleItems}
+        <Combobox
+          options={available.map((r) => ({ label: r.name, value: String(r.id) }))}
           value={selected}
-          onValueChange={(v) => setSelected(v ?? '')}
-        >
-          <SelectTrigger className="w-full" aria-label="Agregar rol">
-            <SelectValue placeholder="Agregar rol…" />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.isLoading ? (
-              <SelectItem value={PLACEHOLDER} disabled>
-                Cargando…
-              </SelectItem>
-            ) : available.length === 0 ? (
-              <SelectItem value={PLACEHOLDER} disabled>
-                No hay roles disponibles
-              </SelectItem>
-            ) : (
-              available.map((r) => (
-                <SelectItem key={r.id} value={String(r.id)}>
-                  {r.name}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+          onChange={(v) => setSelected(v ?? '')}
+          loading={roles.isLoading}
+          placeholder="Agregar rol…"
+          searchPlaceholder="Buscar rol…"
+          emptyText="No hay roles disponibles."
+          triggerClassName="w-full"
+        />
         <Button
           type="button"
           onClick={handleAssign}

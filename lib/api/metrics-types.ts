@@ -66,7 +66,10 @@ export interface RecruitmentFunnelStage {
 
 export interface PlacementMetric {
   recruiterId: number;
+  /** Nombre del reclutador resuelto por el backend (null si no se pudo resolver). */
+  recruiterName?: string | null;
   clientId: number;
+  clientName?: string | null;
   count: number;
   totalFee: number;
   avgTimeToFillSeconds: number;

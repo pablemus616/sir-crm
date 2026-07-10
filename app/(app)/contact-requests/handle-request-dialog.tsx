@@ -9,24 +9,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { useList } from '@/lib/api/hooks';
 import { useHandleRequest } from '@/lib/api/contact-requests';
 import type { Client, ContactRequest } from '@/lib/api/types/commercial';
 
-/** Centinela para el item placeholder (cargando / vacío / error): base-ui Select
- *  exige un `value` en cada Item; este nunca se selecciona porque va deshabilitado. */
-const PLACEHOLDER = '__placeholder__';
-/** Centinela para limpiar la selección de un campo opcional de vuelta a "ninguno". */
-const NONE = '__none__';
 /** Cota máxima de clientes cargados en el combo (el backend ordena por id DESC). */
-const CLIENTS_LIMIT = 200;
+const CLIENTS_LIMIT = 1000;
 
 export function HandleRequestDialog({
   request,
@@ -53,11 +42,6 @@ export function HandleRequestDialog({
     );
 
   const items = clients.data?.items ?? [];
-  const total = clients.data?.total ?? 0;
-  const truncated = total > items.length;
-
-  const clientItems: Record<string, string> = {};
-  for (const c of items) clientItems[String(c.id)] = c.name;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -75,44 +59,23 @@ export function HandleRequestDialog({
         )}
         <div className="space-y-1">
           <Label htmlFor="clientId">Cliente resultante (opcional)</Label>
-          <Select
-            items={clientItems}
+          <Combobox
+            id="clientId"
+            options={items.map((c) => ({ label: c.name, value: String(c.id) }))}
             value={clientId}
-            onValueChange={(v) => setClientId(v === NONE ? '' : (v ?? ''))}
-          >
-            <SelectTrigger id="clientId" className="w-full">
-              <SelectValue placeholder="Seleccionar cliente…" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients.isLoading ? (
-                <SelectItem value={PLACEHOLDER} disabled>
-                  Cargando…
-                </SelectItem>
-              ) : clients.isError ? (
-                <SelectItem value={PLACEHOLDER} disabled>
-                  No se pudieron cargar los clientes.
-                </SelectItem>
-              ) : items.length === 0 ? (
-                <SelectItem value={PLACEHOLDER} disabled>
-                  No hay clientes disponibles
-                </SelectItem>
-              ) : (
-                <>
-                  <SelectItem value={NONE}>Sin cliente</SelectItem>
-                  {items.map((c) => (
-                    <SelectItem key={c.id} value={String(c.id)}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                  {truncated && (
-                    <SelectItem value={PLACEHOLDER} disabled>
-                      Mostrando los {items.length} clientes más recientes de {total}.
-                    </SelectItem>
-                  )}
-                </>
-              )}
-            </SelectContent>
-          </Select>
+            onChange={(v) => setClientId(v ?? '')}
+            loading={clients.isLoading}
+            clearable
+            clearLabel="Sin cliente"
+            placeholder="Seleccionar cliente…"
+            searchPlaceholder="Buscar cliente…"
+            emptyText={
+              clients.isError
+                ? 'No se pudieron cargar los clientes.'
+                : 'No hay clientes disponibles.'
+            }
+            triggerClassName="w-full"
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>

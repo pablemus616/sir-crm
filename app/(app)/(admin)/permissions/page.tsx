@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { ResourcePage } from '@/components/resource/resource-page';
+import { PermissionsBoard } from '@/components/admin/permissions-board';
 
 export const metadata: Metadata = { title: 'Permisos · SIR CRM' };
 
 export default function PermissionsPage() {
-  return <ResourcePage resourceKey="permissions" />;
+  return <PermissionsBoard />;
 }

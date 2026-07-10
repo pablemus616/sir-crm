@@ -3,16 +3,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { visibleGroups } from '@/lib/auth/nav'
+import type { Me } from '@/lib/auth/types'
 
 export function NavLinks({
-  admin,
+  me,
   onNavigate,
 }: {
-  admin: boolean
+  me: Me
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
-  const groups = visibleGroups(admin)
+  const groups = visibleGroups(me)
 
   return (
     <nav className="flex flex-col gap-6">

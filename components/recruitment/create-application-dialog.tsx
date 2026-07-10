@@ -18,13 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateApplication } from '@/lib/api/applications';
@@ -39,8 +33,12 @@ import type { Opportunity } from '@/lib/api/types/commercial';
 export function CreateApplicationDialog() {
   const [open, setOpen] = useState(false);
   const create = useCreateApplication();
-  const candidates = useList<Candidate>('candidates', { limit: 100 });
-  const opportunities = useList<Opportunity>('opportunities', { limit: 100 });
+  // Solo candidatos disponibles: sin placement, sin rechazo y sin proceso activo.
+  const candidates = useList<Candidate>('candidates', {
+    limit: 1000,
+    available: true,
+  });
+  const opportunities = useList<Opportunity>('opportunities', { limit: 1000 });
 
   const form = useForm<CreateApplicationInput>({
     resolver: zodResolver(createApplicationSchema),
@@ -53,14 +51,6 @@ export function CreateApplicationDialog() {
         form.reset();
       },
     });
-
-  const candidateItems: Record<string, string> = {};
-  for (const c of candidates.data?.items ?? [])
-    candidateItems[String(c.id)] = `${c.firstName} ${c.lastName}`;
-
-  const opportunityItems: Record<string, string> = {};
-  for (const o of opportunities.data?.items ?? [])
-    opportunityItems[String(o.id)] = String(o.title ?? `Oportunidad #${o.id}`);
 
   return (
     <>
@@ -81,24 +71,21 @@ export function CreateApplicationDialog() {
                   <FormItem>
                     <FormLabel>Candidato</FormLabel>
                     <FormControl>
-                      <Select
-                        items={candidateItems}
-                        value={field.value != null ? String(field.value) : ''}
-                        onValueChange={(v) =>
+                      <Combobox
+                        options={(candidates.data?.items ?? []).map((c) => ({
+                          label: `${c.firstName} ${c.lastName}`,
+                          value: String(c.id),
+                        }))}
+                        value={field.value}
+                        onChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
                         }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona un candidato" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {candidates.data?.items.map((c) => (
-                            <SelectItem key={c.id} value={String(c.id)}>
-                              {`${c.firstName} ${c.lastName}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        loading={candidates.isLoading}
+                        placeholder="Selecciona un candidato"
+                        searchPlaceholder="Buscar candidato…"
+                        emptyText="No hay candidatos disponibles"
+                        triggerClassName="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -112,24 +99,20 @@ export function CreateApplicationDialog() {
                   <FormItem>
                     <FormLabel>Oportunidad</FormLabel>
                     <FormControl>
-                      <Select
-                        items={opportunityItems}
-                        value={field.value != null ? String(field.value) : ''}
-                        onValueChange={(v) =>
+                      <Combobox
+                        options={(opportunities.data?.items ?? []).map((o) => ({
+                          label: o.title ?? `Oportunidad #${o.id}`,
+                          value: String(o.id),
+                        }))}
+                        value={field.value}
+                        onChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
                         }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona una oportunidad" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {opportunities.data?.items.map((o) => (
-                            <SelectItem key={o.id} value={String(o.id)}>
-                              {o.title ?? `Oportunidad #${o.id}`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        loading={opportunities.isLoading}
+                        placeholder="Selecciona una oportunidad"
+                        searchPlaceholder="Buscar oportunidad…"
+                        triggerClassName="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

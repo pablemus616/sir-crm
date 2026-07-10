@@ -72,6 +72,7 @@ export interface ContactRequest {
   wasHandled: boolean;
   handledByEmployeeId?: number | null;
   resultingClientId?: number | null;
+  resultingClient?: { id: number; name: string } | null;
   createdAt: string;
 }
 

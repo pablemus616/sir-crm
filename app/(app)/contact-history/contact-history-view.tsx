@@ -7,21 +7,20 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContactHistory, type ContactHistoryFilters } from '@/lib/api/contact-history';
 import { useList } from '@/lib/api/hooks';
+import { Combobox } from '@/components/ui/combobox';
 import { contactDirectionLabels } from '@/lib/domain/commercial-labels';
 import { formatDateTime } from '@/lib/format';
 import type { Client, ClientContact, ContactDirection } from '@/lib/api/types/commercial';
 import { LogContactForm } from './log-contact-form';
-
-const filterSelectClass = 'w-full rounded-md border border-input bg-background p-2 text-sm';
 
 export function ContactHistoryView() {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<ContactHistoryFilters>({});
   const q = useContactHistory(filters);
 
-  const clients = useList<Client>('clients', { limit: 100 });
-  const contacts = useList<ClientContact>('client-contacts', { limit: 100 });
-  const contactTypes = useList<{ id: number; name: string }>('contact-types', { limit: 100 });
+  const clients = useList<Client>('clients', { limit: 1000 });
+  const contacts = useList<ClientContact>('client-contacts', { limit: 1000 });
+  const contactTypes = useList<{ id: number; name: string }>('contact-types', { limit: 1000 });
 
   const setNum = (key: keyof ContactHistoryFilters) => (value: string) =>
     setFilters((f) => ({ ...f, [key]: value ? Number(value) : undefined }));
@@ -42,75 +41,73 @@ export function ContactHistoryView() {
       <div className="grid grid-cols-1 gap-3 rounded-md border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-1">
           <Label htmlFor="f-client">Cliente</Label>
-          <select
+          <Combobox
             id="f-client"
-            className={filterSelectClass}
-            value={filters.clientId ?? ''}
-            onChange={(e) => setNum('clientId')(e.target.value)}
-          >
-            <option value="">Todos</option>
-            {clients.data?.items.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            options={(clients.data?.items ?? []).map((c) => ({ label: c.name, value: String(c.id) }))}
+            value={filters.clientId}
+            onChange={(v) => setNum('clientId')(v ?? '')}
+            loading={clients.isLoading}
+            clearable
+            clearLabel="Todos"
+            placeholder="Todos"
+            searchPlaceholder="Buscar cliente…"
+            triggerClassName="w-full"
+          />
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="f-contact">Contacto</Label>
-          <select
+          <Combobox
             id="f-contact"
-            className={filterSelectClass}
-            value={filters.contactId ?? ''}
-            onChange={(e) => setNum('contactId')(e.target.value)}
-          >
-            <option value="">Todos</option>
-            {contacts.data?.items.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            options={(contacts.data?.items ?? []).map((c) => ({ label: c.name, value: String(c.id) }))}
+            value={filters.contactId}
+            onChange={(v) => setNum('contactId')(v ?? '')}
+            loading={contacts.isLoading}
+            clearable
+            clearLabel="Todos"
+            placeholder="Todos"
+            searchPlaceholder="Buscar contacto…"
+            triggerClassName="w-full"
+          />
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="f-type">Tipo</Label>
-          <select
+          <Combobox
             id="f-type"
-            className={filterSelectClass}
-            value={filters.contactType ?? ''}
-            onChange={(e) => setNum('contactType')(e.target.value)}
-          >
-            <option value="">Todos</option>
-            {contactTypes.data?.items.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+            options={(contactTypes.data?.items ?? []).map((t) => ({ label: t.name, value: String(t.id) }))}
+            value={filters.contactType}
+            onChange={(v) => setNum('contactType')(v ?? '')}
+            loading={contactTypes.isLoading}
+            clearable
+            clearLabel="Todos"
+            placeholder="Todos"
+            searchPlaceholder="Buscar tipo…"
+            triggerClassName="w-full"
+          />
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="f-direction">Dirección</Label>
-          <select
+          <Combobox
             id="f-direction"
-            className={filterSelectClass}
-            value={filters.direction ?? ''}
-            onChange={(e) =>
+            options={(Object.keys(contactDirectionLabels) as ContactDirection[]).map((d) => ({
+              label: contactDirectionLabels[d],
+              value: d,
+            }))}
+            value={filters.direction}
+            onChange={(v) =>
               setFilters((f) => ({
                 ...f,
-                direction: (e.target.value || undefined) as ContactDirection | undefined,
+                direction: (v || undefined) as ContactDirection | undefined,
               }))
             }
-          >
-            <option value="">Todas</option>
-            {(Object.keys(contactDirectionLabels) as ContactDirection[]).map((d) => (
-              <option key={d} value={d}>
-                {contactDirectionLabels[d]}
-              </option>
-            ))}
-          </select>
+            clearable
+            clearLabel="Todas"
+            placeholder="Todas"
+            searchPlaceholder="Buscar dirección…"
+            triggerClassName="w-full"
+          />
         </div>
 
         <div className="space-y-1">

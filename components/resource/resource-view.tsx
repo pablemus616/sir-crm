@@ -22,6 +22,8 @@ import { ResourceFilters } from "./resource-filters";
 import type { ResourceDescriptor } from "@/lib/resources/types";
 import type { ListParams } from "@/lib/api/types";
 import { toSpanishError } from "@/lib/api/error-message";
+import { useMe } from "@/lib/api/hooks/use-me";
+import { can } from "@/lib/auth/permissions";
 
 export function ResourceView<T extends { id: string | number }, S extends ZodType>({
   resource,
@@ -54,6 +56,13 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
   const create = hooks.useCreate();
   const update = hooks.useUpdate();
   const remove = hooks.useRemove();
+
+  // Permission gating: the resource key is also the permission module key.
+  const me = useMe().data;
+  const canCreate = me ? can(me, config.key, "create") : false;
+  const canUpdate = me ? can(me, config.key, "update") : false;
+  const canDelete = me ? can(me, config.key, "delete") : false;
+  const denied = me != null && !can(me, config.key, "read");
 
   function handleFilterChange(key: string, value: string | number | boolean | undefined) {
     setPage(1);
@@ -99,11 +108,19 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
     }
   }
 
+  if (denied) {
+    return (
+      <div className="rounded-md border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+        No tienes permiso para ver este módulo.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl text-foreground">{config.label}</h1>
-        <Button onClick={openCreate}>Nuevo</Button>
+        {canCreate && <Button onClick={openCreate}>Nuevo</Button>}
       </div>
 
       {config.filters && config.filters.length > 0 && (
@@ -131,8 +148,8 @@ export function ResourceView<T extends { id: string | number }, S extends ZodTyp
         sorting={sorting}
         onSortingChange={setSorting}
         onView={setDetailRow}
-        onEdit={openEdit}
-        onDelete={setPendingDelete}
+        onEdit={canUpdate ? openEdit : undefined}
+        onDelete={canDelete ? setPendingDelete : undefined}
       />
 
       <ResourceForm
