@@ -23,7 +23,7 @@ import { Combobox } from '@/components/ui/combobox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreatePlacement } from '@/lib/api/placements';
+import { useCreatePlacement, usePlacements } from '@/lib/api/placements';
 import { useApplications } from '@/lib/api/applications';
 import {
   createPlacementSchema,
@@ -39,6 +39,7 @@ export function CreatePlacementDialog() {
   const [open, setOpen] = useState(false);
   const create = useCreatePlacement();
   const applications = useApplications({ limit: 1000 });
+  const placements = usePlacements({ limit: 1000 });
 
   const form = useForm<CreatePlacementInput>({
     resolver: zodResolver(createPlacementSchema),
@@ -52,13 +53,21 @@ export function CreatePlacementDialog() {
       },
     });
 
+  // La verdad de "ya tiene placement" es la fila de placement, no la etapa: una
+  // app puede estar 'hired' (por movimiento manual de etapa) y aún no tener
+  // placement. Excluimos por existencia de placement, no por la etapa 'hired'.
+  const placedApplicationIds = new Set(
+    (placements.data?.items ?? []).map((p) => p.applicationId),
+  );
+
   const applicationOptions = (applications.data?.items ?? [])
-    // 'hired' ya tiene placement; 'rejected'/'withdrawn' no son colocables.
+    // 'rejected'/'withdrawn' no son colocables; el resto es colocable mientras
+    // no tenga ya un placement registrado.
     .filter(
       (a) =>
         a.stage !== 'rejected' &&
         a.stage !== 'withdrawn' &&
-        a.stage !== 'hired',
+        !placedApplicationIds.has(a.id),
     )
     .map((a) => ({
       value: String(a.id),
@@ -101,7 +110,7 @@ export function CreatePlacementDialog() {
                         onChange={(v) =>
                           field.onChange(v == null ? undefined : Number(v))
                         }
-                        loading={applications.isLoading}
+                        loading={applications.isLoading || placements.isLoading}
                         placeholder="Selecciona una aplicación"
                         searchPlaceholder="Buscar aplicación…"
                         triggerClassName="w-full"
