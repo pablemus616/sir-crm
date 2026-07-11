@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { useDashboardFilters } from '@/lib/dashboard/use-dashboard-filters';
 import { useList } from '@/lib/api/hooks';
+import { employeeFullName } from '@/lib/format';
+import type { Employee } from '@/lib/api/types/admin';
 import { FilterSelect } from './filter-select';
 import { DateRangeFilter } from './date-range-filter';
 import { Button } from '@/components/ui/button';
@@ -19,7 +21,7 @@ function DashboardFiltersInner() {
   const sectors = useList<{ id: number; name: string }>('sectors', { limit: 200 });
   const areas = useList<{ id: number; name: string }>('position-areas', { limit: 200 });
   const clients = useList<{ id: number; name: string }>('clients', { limit: 200 });
-  const employees = useList<{ id: number; name: string }>('employees', { limit: 200 });
+  const employees = useList<Employee>('employees', { limit: 200 });
   const stages = useList<{ id: number; name: string }>('pipeline-stages', {
     active: true,
     limit: 200,
@@ -28,10 +30,13 @@ function DashboardFiltersInner() {
   const opts = (items?: { id: number; name: string }[]) =>
     (items ?? []).map((i) => ({ value: String(i.id), label: i.name }));
 
+  const employeeOpts = (items?: Employee[]) =>
+    (items ?? []).map((e) => ({ value: String(e.id), label: employeeFullName(e) }));
+
   const num = (v: string | undefined) => (v ? Number(v) : undefined);
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-border bg-background/95 py-3 backdrop-blur">
+    <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 border-b border-border bg-background/95 py-3 backdrop-blur">
       <DateRangeFilter
         from={filters.from}
         to={filters.to}
@@ -58,7 +63,7 @@ function DashboardFiltersInner() {
       <FilterSelect
         placeholder="Responsable"
         value={filters.responsibleEmployeeId}
-        options={opts(employees.data?.items)}
+        options={employeeOpts(employees.data?.items)}
         onChange={(v) => setFilter('responsibleEmployeeId', num(v))}
       />
       <FilterSelect
@@ -82,7 +87,7 @@ function DashboardFiltersInner() {
 
 function DashboardFiltersFallback() {
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-border bg-background/95 py-3 backdrop-blur">
+    <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 border-b border-border bg-background/95 py-3 backdrop-blur">
       <div className="h-8 w-36 animate-pulse rounded-lg bg-muted" />
       <div className="h-8 w-44 animate-pulse rounded-lg bg-muted" />
       <div className="h-8 w-44 animate-pulse rounded-lg bg-muted" />

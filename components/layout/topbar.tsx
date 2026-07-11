@@ -1,7 +1,6 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Search } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,7 +18,7 @@ export function Topbar({ me }: { me: Me }) {
   const current = labelForHref(pathname)
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur">
       <MobileNav me={me} />
       <Breadcrumb className="hidden sm:block">
         <BreadcrumbList>
@@ -38,12 +37,6 @@ export function Topbar({ me }: { me: Me }) {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="ml-auto flex items-center gap-2">
-        {/* Slot del command palette (⌘K) — se cablea en Fase 8 */}
-        <div className="hidden items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-muted-foreground lg:flex">
-          <Search className="size-4" />
-          <span>Buscar…</span>
-          <kbd className="ml-2 rounded bg-muted px-1.5 text-xs">⌘K</kbd>
-        </div>
         <UserMenu me={me} />
       </div>
     </header>

@@ -66,6 +66,16 @@ export function formatDuration(seconds: number): string {
   return hours > 0 ? `${hours} h ${mins} min` : `${mins} min`;
 }
 
+/** Nombre completo de un empleado/persona a partir de sus partes (ignora las vacías). */
+export function employeeFullName(p: {
+  firstName?: string | null;
+  secondName?: string | null;
+  lastName?: string | null;
+  surName?: string | null;
+}): string {
+  return [p.firstName, p.secondName, p.lastName, p.surName].filter(Boolean).join(" ");
+}
+
 export function formatDate(value: string | number | Date): string {
   return dateFormatter.format(new Date(value));
 }

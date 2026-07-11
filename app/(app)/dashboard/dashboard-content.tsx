@@ -4,7 +4,7 @@ import { DashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { KpiCards } from '@/components/dashboard/kpi-cards';
 import { PipelineChart } from '@/components/dashboard/pipeline-chart';
 import { DimensionCharts } from '@/components/dashboard/dimension-charts';
-import { ContactsChart } from '@/components/dashboard/contacts-chart';
+import { InteractionsLeaderboardChart } from '@/components/dashboard/interactions-leaderboard-chart';
 import { RecruitmentFunnelChart } from '@/components/dashboard/recruitment-funnel-chart';
 import { PlacementsChart } from '@/components/dashboard/placements-chart';
 
@@ -29,7 +29,7 @@ export function DashboardContent() {
       <div className="grid gap-6 xl:grid-cols-2">
         <PipelineChart />
         <RecruitmentFunnelChart />
-        <ContactsChart />
+        <InteractionsLeaderboardChart />
         <PlacementsChart />
       </div>
 
