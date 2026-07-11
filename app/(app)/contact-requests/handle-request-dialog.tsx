@@ -50,11 +50,11 @@ export function HandleRequestDialog({
           <DialogTitle>Atender solicitud</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          {request.name ?? 'Sin nombre'} · {request.email ?? request.phone ?? '—'}
+          {request.contactName ?? 'Sin nombre'} · {request.email ?? request.phoneNumber ?? '—'}
         </p>
-        {request.message && (
+        {request.requestDesc && (
           <p className="rounded-md bg-secondary/60 p-3 text-sm text-foreground">
-            {request.message}
+            {request.requestDesc}
           </p>
         )}
         <div className="space-y-1">

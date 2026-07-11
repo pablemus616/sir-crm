@@ -65,10 +65,10 @@ export interface Opportunity {
 
 export interface ContactRequest {
   id: number;
-  name?: string | null;
+  contactName?: string | null;
   email?: string | null;
-  phone?: string | null;
-  message?: string | null;
+  phoneNumber?: string | null;
+  requestDesc?: string | null;
   wasHandled: boolean;
   handledByEmployeeId?: number | null;
   resultingClientId?: number | null;

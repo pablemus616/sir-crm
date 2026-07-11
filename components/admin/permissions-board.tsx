@@ -138,6 +138,10 @@ export function PermissionsBoard() {
 
   const loading =
     rolesQuery.isLoading || permsQuery.isLoading || catalogQuery.isLoading
+  // Sin definiciones de permisos en la BD no hay id que asignar: los toggles no
+  // podrían hacer nada. Lo hacemos explícito en vez de fallar en silencio.
+  const noPermissionDefs =
+    !loading && (permsQuery.data?.items.length ?? 0) === 0
 
   return (
     <div className="space-y-4">
@@ -161,6 +165,15 @@ export function PermissionsBoard() {
         <div className="flex items-center gap-2 rounded-md border border-border bg-card p-8 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" />
           Cargando permisos…
+        </div>
+      ) : noPermissionDefs ? (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-6 text-sm text-foreground">
+          <p className="font-medium">Faltan los permisos base.</p>
+          <p className="mt-1 text-muted-foreground">
+            La tabla de permisos está vacía, por eso los cambios no se guardan.
+            Reinicia el backend (se sincronizan solos al arrancar) o corre el
+            seed, y vuelve a abrir esta página.
+          </p>
         </div>
       ) : roles.length === 0 ? (
         <div className="rounded-md border border-border bg-card p-8 text-center text-sm text-muted-foreground">

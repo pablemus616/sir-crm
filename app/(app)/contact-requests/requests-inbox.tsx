@@ -46,17 +46,17 @@ function RequestList({ wasHandled }: { wasHandled?: boolean }) {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <p className="truncate text-sm font-medium text-foreground">
-                  {r.name ?? 'Sin nombre'}
+                  {r.contactName ?? 'Sin nombre'}
                 </p>
                 <Badge variant={r.wasHandled ? 'secondary' : 'outline'}>
                   {r.wasHandled ? 'Atendida' : 'Pendiente'}
                 </Badge>
               </div>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {[r.email, r.phone].filter(Boolean).join(' · ')} · {formatDateTime(r.createdAt)}
+                {[r.email, r.phoneNumber].filter(Boolean).join(' · ')} · {formatDateTime(r.createdAt)}
               </p>
-              {r.message && (
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.message}</p>
+              {r.requestDesc && (
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.requestDesc}</p>
               )}
               {r.wasHandled && r.resultingClientId && (
                 <p className="mt-1 text-xs text-muted-foreground">
