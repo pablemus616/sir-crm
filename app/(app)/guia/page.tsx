@@ -43,14 +43,21 @@ const comercial: ModuleDoc[] = [
     name: 'Oportunidades',
     color: 'var(--chart-1)',
     does: 'Manejas cada negocio: le pones cliente, monto y probabilidad, y lo empujas por etapas hasta ganarlo o perderlo.',
-    moves: ['Oportunidades abiertas', 'Valor del pipeline', 'Pipeline por etapa', 'Conversión', 'Por cliente / sector / área'],
+    moves: [
+      'Ventas y Quetzales ganados',
+      'Conversión',
+      'Forecast ponderado',
+      'Propuestas enviadas',
+      'Pipeline por etapa',
+      'Por cliente / sector / área',
+    ],
   },
   {
     icon: Building2,
     name: 'Clientes',
     color: 'var(--chart-1)',
     does: 'Das de alta las empresas cliente y les asignas su sector.',
-    moves: ['Tarjeta “Clientes”', 'Oportunidades por sector'],
+    moves: ['Oportunidades por cliente', 'Oportunidades por sector'],
   },
   {
     icon: Contact,
@@ -64,7 +71,7 @@ const comercial: ModuleDoc[] = [
     name: 'Solicitudes',
     color: 'var(--chart-1)',
     does: 'Es tu bandeja de leads entrantes: los atiendes y marcas de qué cliente resultaron.',
-    moves: ['Solicitudes sin atender', 'Atendidas y convertidas', 'Tiempo de respuesta'],
+    moves: ['Nuevos clientes al convertirlas'],
   },
   {
     icon: History,
@@ -81,7 +88,7 @@ const reclutamiento: ModuleDoc[] = [
     name: 'Candidatos',
     color: 'var(--chart-2)',
     does: 'Mantienes la base de personas buscando empleo y su estado.',
-    moves: ['Tarjeta “Candidatos activos”'],
+    moves: ['Embudo de reclutamiento (al postularlos)'],
   },
   {
     icon: FileText,
@@ -95,14 +102,14 @@ const reclutamiento: ModuleDoc[] = [
     name: 'Colocaciones',
     color: 'var(--chart-2)',
     does: 'Registras la contratación exitosa: quién se colocó, con qué reclutador, honorarios y fecha.',
-    moves: ['Colocaciones del mes', 'Honorarios por reclutador', 'Tiempo de cierre'],
+    moves: ['Colocaciones por reclutador', 'Honorarios por reclutador', 'Tiempo de cierre'],
   },
   {
     icon: PhoneCall,
     name: 'Interacciones',
     color: 'var(--chart-2)',
     does: 'Registras contactos y llamadas con candidatos: tipo, dirección y duración.',
-    moves: ['Interacciones por tipo'],
+    moves: ['Interacciones por empleado'],
   },
 ];
 
@@ -336,8 +343,8 @@ export default function GuiaPage() {
           <div className="space-y-0.5">
             <p className="text-sm font-medium text-foreground">Todo se puede filtrar</p>
             <p className="text-sm text-muted-foreground">
-              Cada tablero filtra por rango de fechas y por segmento (cliente, sector, área, etapa,
-              responsable). Cambiar un filtro reconsulta todo.
+              Cada tablero filtra por rango de fechas (días completos, hora de Guatemala) y por
+              segmento (cliente, sector, área, etapa, responsable). Cambiar un filtro reconsulta todo.
             </p>
           </div>
         </div>

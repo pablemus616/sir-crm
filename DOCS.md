@@ -79,16 +79,24 @@ registran al operar los módulos. Si un tablero sale vacío o bajo, casi siempre
 porque la **acción que lo alimenta** no se está registrando (no porque el reporte
 esté mal). Los endpoints viven en `sir-api` → `src/metrics/`.
 
-### 3.1 Tarjetas de KPI (`GET /metrics/overview`)
+### 3.1 Tarjetas de KPI (`GET /metrics/commercial`)
 
 | Tarjeta | De dónde sale | Acción que la alimenta |
 |---|---|---|
-| Clientes | `COUNT(clients)` | Crear clientes |
-| Candidatos activos | `COUNT(candidates WHERE status='active')` | Crear candidatos / mantener su estado |
-| Solicitudes sin atender | `COUNT(contact_requests WHERE wasHandled=false)` | Dejar solicitudes sin atender (baja = bueno) |
-| Oportunidades abiertas | `COUNT(opportunities WHERE status='open')` | Crear oportunidades |
-| Valor del pipeline | `SUM(amount)` de oportunidades abiertas | Poner monto a las oportunidades |
-| Colocaciones del mes | `COUNT(placements)` del mes actual por `placementDate` | Registrar colocaciones |
+| Oportunidades | `COUNT(opportunities)` | Crear oportunidades |
+| Ventas ganadas | `COUNT(status='won')` | Ganar oportunidades (ver nota) |
+| Conversión | ganadas / total (y ganadas / propuestas enviadas) | Ganar oportunidades y enviar propuestas |
+| Quetzales ganados | `SUM(amount)` de las oportunidades con `status='won'` | Ganar oportunidades **con monto** (sin monto suman 0) |
+| Forecast ponderado | `SUM(amount × probabilidad/100)` de las abiertas | Mover de etapa (cada etapa trae su probabilidad) |
+| Propuestas enviadas | `COUNT(proposalSentAt)` (+ su monto) | Enviar propuesta |
+
+> **Nota — qué cuenta como ganada:** lo que suma es el `status`, no la columna del
+> kanban, pero el status siempre sigue a la etapa. Una oportunidad queda `won` al
+> entrar a cualquier etapa marcada como ganada (p. ej. **Ganada** o **Cerrada**):
+> arrastrándola en el kanban, creándola directamente ahí, cambiando su etapa en el
+> formulario, con "Marcar ganada" o cuando sus colocaciones completan el headcount.
+> Igual con las etapas perdidas y `lost`. Las ganadas/perdidas siguen visibles en su
+> columna del kanban; se reabren arrastrándolas a una etapa abierta.
 
 ### 3.2 Gráficas del dashboard
 
@@ -96,7 +104,7 @@ esté mal). Los endpoints viven en `sir-api` → `src/metrics/`.
 |---|---|---|
 | **Pipeline por etapa** | `/metrics/pipeline` | Oportunidades agrupadas por etapa (conteo + monto). Se alimenta al **mover oportunidades de etapa**. |
 | **Embudo de reclutamiento** | `/metrics/recruitment/funnel` | Aplicaciones agrupadas por etapa del embudo. Se alimenta al **crear aplicaciones y avanzarlas de etapa**. |
-| **Interacciones por tipo** | `/metrics/candidate-contacts` | Interacciones **con candidatos** agrupadas por tipo/dirección (conteo, duración total y promedio). Se alimenta al **registrar interacciones con candidatos** (módulo Interacciones), no del historial comercial. |
+| **Interacciones por empleado** | `/metrics/candidate-contacts` | Ranking de empleados por número de interacciones **con candidatos** (la API las agrupa por empleado/tipo/dirección y la gráfica las suma por empleado). Se alimenta al **registrar interacciones con candidatos** (módulo Interacciones), no del historial comercial. |
 | **Colocaciones por reclutador** | `/metrics/placements` | Por reclutador y cliente: conteo, suma de honorarios y **tiempo promedio de cierre** (`placementDate − opportunity.createdAt`). Se alimenta al **registrar colocaciones**. |
 | **Oportunidades por cliente / sector / área** | `/metrics/charts/by-client` · `by-sector` · `by-area` | Por cada dimensión: oportunidades (conteo), ganadas (conteo) y monto ganado. Se alimenta al **crear y ganar oportunidades** (el sector viene del cliente; el área, de la oportunidad). |
 
@@ -104,7 +112,7 @@ esté mal). Los endpoints viven en `sir-api` → `src/metrics/`.
 
 | Reporte | Endpoint | Qué mide |
 |---|---|---|
-| **Conversión comercial** | `/metrics/commercial` | Total de oportunidades, ganadas, propuestas enviadas, monto ganado, **valor ponderado** (`amount × probabilidad/100` de las abiertas) y ratios de conversión (ganadas/total y ganadas/propuestas). |
+| **Resumen** | `/metrics/overview` | Clientes, candidatos activos, solicitudes sin atender, oportunidades abiertas, valor del pipeline (`SUM(amount)` de las abiertas) y colocaciones del mes calendario de Guatemala. |
 | **Solicitudes** (solo admin) | `/metrics/requests` | Embudo de leads entrantes: total, atendidas, **convertidas** (con cliente resultante), tiempo promedio de respuesta, y tasas de atención y conversión. |
 
 ### 3.4 Alcance por usuario (importante para leer los números)
@@ -113,13 +121,19 @@ esté mal). Los endpoints viven en `sir-api` → `src/metrics/`.
 - **No-admin:** el backend **fuerza** el filtro a su propio empleado
   (`responsibleEmployeeId` en oportunidades, `placedByEmployeeId` en colocaciones),
   ignorando cualquier filtro de dueño que venga en la petición. Es decir, un
-  no-admin **solo ve las métricas que alimentan sus propias acciones**.
+  no-admin **solo ve las métricas que alimentan sus propias acciones**. En
+  colocaciones cuenta solo quién colocó, aunque la oportunidad sea de otro comercial.
 
 ### 3.5 Filtros del dashboard
 
 Todos los tableros aceptan filtros de **rango de fechas** (`from`/`to`) y de
 **segmento** (cliente, área, sector, etapa, estado, empleado responsable). Cambiar
 un filtro reconsulta; no repinta datos viejos.
+
+El rango son **días de calendario en hora de Guatemala, ambos inclusivos** (del 1 al
+31 incluye todo el 31). Cada tablero filtra por su propia fecha: las métricas de
+oportunidades (KPIs, pipeline, gráficas por dimensión) por **fecha de creación** —no
+de cierre—, colocaciones por `placementDate` e interacciones por `contactTime`.
 
 ---
 
