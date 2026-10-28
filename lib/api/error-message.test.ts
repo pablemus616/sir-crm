@@ -34,6 +34,24 @@ describe('toSpanishError', () => {
     );
   });
 
+  it('mapea el 409 de borrar algo con registros relacionados', () => {
+    expect(toSpanishError(new Error('Cannot delete: it has related records'))).toBe(
+      'No se puede eliminar: tiene registros relacionados (p. ej. oportunidades, contactos o historial).',
+    );
+  });
+
+  it('mapea "Related record not found"', () => {
+    expect(toSpanishError(new Error('Related record not found'))).toBe(
+      'Uno de los registros relacionados ya no existe.',
+    );
+  });
+
+  it('usa el fallback de la acción para un 500 genérico en inglés', () => {
+    expect(toSpanishError(new Error('Internal server error'), 'No se pudo eliminar.')).toBe(
+      'No se pudo eliminar.',
+    );
+  });
+
   it('devuelve el mensaje original cuando no hay mapeo (passthrough de Error)', () => {
     expect(toSpanishError(new Error('Illegal transition'))).toBe('Illegal transition');
   });

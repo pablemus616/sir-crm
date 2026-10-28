@@ -25,6 +25,17 @@ export function toSpanishError(e: unknown, fallback = 'Ocurrió un error.'): str
   if (msg.includes('already exists')) {
     return 'Ya existe un registro con esos datos.';
   }
+  // 409 del backend al borrar algo que otros registros siguen usando.
+  if (msg.includes('has related records')) {
+    return 'No se puede eliminar: tiene registros relacionados (p. ej. oportunidades, contactos o historial).';
+  }
+  if (msg.includes('Related record not found')) {
+    return 'Uno de los registros relacionados ya no existe.';
+  }
+  // Un 500 sin detalle: mejor el mensaje de la acción que el texto en inglés.
+  if (msg === 'Internal server error') {
+    return fallback;
+  }
 
   return msg;
 }
