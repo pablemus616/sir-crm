@@ -2,8 +2,9 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { clientFetch } from '@/lib/api/client';
+import { metricsKeys } from '@/lib/api/metrics';
 import type { Paginated } from '@/lib/api/types';
-import type { Opportunity, PipelineStage } from '@/lib/api/types/commercial';
+import type { Opportunity, OpportunityStatus, PipelineStage } from '@/lib/api/types/commercial';
 import { applyStageMove, applyStatusChange } from '@/lib/kanban/move-stage';
 import type {
   ChangeStageInput,
@@ -35,7 +36,10 @@ export function useKanbanOpportunities(
     queryKey: [...OPP_KANBAN_KEY, filters],
     queryFn: () =>
       clientFetch<Board>('opportunities', {
-        params: { limit: 200, status: 'open', ...filters },
+        // Sin filtro de status: al mover a una etapa ganada/perdida (Ganada,
+        // Cerrada, Perdida…) el backend cambia el status, y filtrar por 'open'
+        // sacaba la tarjeta del tablero en el refetch.
+        params: { limit: 200, ...filters },
       }),
   });
 }
@@ -81,7 +85,13 @@ function makeOptimistic<TVars extends { id: number }>(
       toast.error('No se pudo actualizar la oportunidad');
     },
     onSuccess: () => toast.success(okMsg),
-    onSettled: () => qc.invalidateQueries({ queryKey: OPP_KANBAN_KEY }),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: OPP_KANBAN_KEY }),
+        // Ganar/perder/mover cambia los KPIs ("Quetzales ganados"…); sin esto el
+        // dashboard puede servir la caché (staleTime 60s) sin el cambio.
+        qc.invalidateQueries({ queryKey: metricsKeys.all }),
+      ]),
   };
 }
 
@@ -92,7 +102,8 @@ function makeOptimistic<TVars extends { id: number }>(
 export function useChangeStage() {
   const qc = useQueryClient();
   return useMutation(
-    makeOptimistic<{ id: number } & ChangeStageInput>(
+    // `status` no se envía (el backend lo deriva de la etapa): solo alimenta el optimismo.
+    makeOptimistic<{ id: number; status?: OpportunityStatus } & ChangeStageInput>(
       qc,
       (v) => `opportunities/${v.id}/stage`,
       ({ pipelineStageId, probability, lostReason }) => ({
@@ -100,7 +111,7 @@ export function useChangeStage() {
         probability,
         lostReason,
       }),
-      (items, v) => applyStageMove(items, v.id, v.pipelineStageId, v.probability),
+      (items, v) => applyStageMove(items, v.id, v.pipelineStageId, v.probability, v.status),
       'Etapa actualizada',
     ),
   );
@@ -181,6 +192,7 @@ export function useCreateOpportunity() {
     onSuccess: () => {
       toast.success('Oportunidad creada');
       qc.invalidateQueries({ queryKey: OPP_KANBAN_KEY });
+      qc.invalidateQueries({ queryKey: metricsKeys.all });
     },
     onError: () => toast.error('No se pudo crear la oportunidad'),
   });
@@ -195,6 +207,7 @@ export function useUpdateOpportunity() {
       toast.success('Oportunidad actualizada');
       qc.invalidateQueries({ queryKey: OPP_KANBAN_KEY });
       qc.invalidateQueries({ queryKey: ['opportunities'] });
+      qc.invalidateQueries({ queryKey: metricsKeys.all });
     },
     onError: () => toast.error('No se pudo actualizar la oportunidad'),
   });

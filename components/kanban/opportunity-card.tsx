@@ -78,15 +78,20 @@ export function OpportunityCard({ opp, onAction, isOverlay = false }: Opportunit
             <DropdownMenuItem onClick={() => onAction('follow-up', opp)}>
               Programar seguimiento
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction('win', opp)}>
-              Marcar ganada
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => onAction('lose', opp)}
-            >
-              Marcar perdida
-            </DropdownMenuItem>
+            {/* Las cerradas siguen en el tablero: no ofrecer la acción que ya tienen */}
+            {opp.status !== 'won' && (
+              <DropdownMenuItem onClick={() => onAction('win', opp)}>
+                Marcar ganada
+              </DropdownMenuItem>
+            )}
+            {opp.status !== 'lost' && (
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => onAction('lose', opp)}
+              >
+                Marcar perdida
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -17,7 +17,7 @@ import {
   useActiveStages,
   useChangeStage,
 } from '@/lib/api/opportunities';
-import { groupByStage, resolveDrop } from '@/lib/kanban/move-stage';
+import { groupByStage, resolveDrop, statusForStage } from '@/lib/kanban/move-stage';
 import { KanbanColumn } from './kanban-column';
 import { OpportunityCard, type CardAction } from './opportunity-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -74,7 +74,11 @@ export function OpportunityBoard({ filters, onAction }: OpportunityBoardProps) {
     const result = resolveDrop(Number(a.id), over, items);
     if (!result) return;
     const targetStage = stages.find((s) => s.id === result.pipelineStageId);
-    changeStage.mutate({ ...result, probability: targetStage?.probability });
+    changeStage.mutate({
+      ...result,
+      probability: targetStage?.probability,
+      status: targetStage && statusForStage(targetStage),
+    });
   };
 
   return (

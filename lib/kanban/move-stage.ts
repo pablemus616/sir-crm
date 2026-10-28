@@ -18,15 +18,28 @@ export function resolveDrop(
   return { id: activeId, pipelineStageId: overStageId };
 }
 
+/** Status que el backend asigna al entrar a una etapa (espejo de changeStage en la API). */
+export function statusForStage(stage: Pick<PipelineStage, 'isWon' | 'isLost'>): OpportunityStatus {
+  if (stage.isWon) return 'won';
+  if (stage.isLost) return 'lost';
+  return 'open';
+}
+
 export function applyStageMove(
   opps: Opportunity[],
   oppId: number,
   newStageId: number,
   newProbability?: number,
+  newStatus?: OpportunityStatus,
 ): Opportunity[] {
   return opps.map((o) =>
     o.id === oppId
-      ? { ...o, pipelineStageId: newStageId, probability: newProbability ?? o.probability }
+      ? {
+          ...o,
+          pipelineStageId: newStageId,
+          probability: newProbability ?? o.probability,
+          status: newStatus ?? o.status,
+        }
       : o,
   );
 }

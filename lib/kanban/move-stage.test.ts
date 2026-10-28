@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { applyStageMove, applyStatusChange, groupByStage, sumColumnAmount, resolveDrop } from './move-stage';
+import {
+  applyStageMove,
+  applyStatusChange,
+  groupByStage,
+  sumColumnAmount,
+  resolveDrop,
+  statusForStage,
+} from './move-stage';
 import type { Opportunity, PipelineStage } from '@/lib/api/types/commercial';
 
 const opp = (id: number, stageId: number, amount?: number): Opportunity =>
@@ -33,6 +40,26 @@ describe('applyStageMove', () => {
 
   it('mantiene la probabilidad previa si no se especifica', () => {
     expect(applyStageMove([opp(1, 1)], 1, 2)[0].probability).toBe(10);
+  });
+
+  it('aplica el status de la etapa destino si se indica (p. ej. a Cerrada → won)', () => {
+    expect(applyStageMove([opp(1, 1)], 1, 9, 100, 'won')[0]).toMatchObject({
+      pipelineStageId: 9,
+      probability: 100,
+      status: 'won',
+    });
+  });
+
+  it('mantiene el status previo si no se especifica', () => {
+    expect(applyStageMove([opp(1, 1)], 1, 2)[0].status).toBe('open');
+  });
+});
+
+describe('statusForStage', () => {
+  it('deriva el status como el backend: ganada → won, perdida → lost, resto → open', () => {
+    expect(statusForStage({ isWon: true, isLost: false })).toBe('won');
+    expect(statusForStage({ isWon: false, isLost: true })).toBe('lost');
+    expect(statusForStage({ isWon: false, isLost: false })).toBe('open');
   });
 });
 

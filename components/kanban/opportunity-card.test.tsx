@@ -71,6 +71,28 @@ describe('OpportunityCard', () => {
     expect(onAction).toHaveBeenCalledWith('win', opp);
   });
 
+  it('en una ganada no ofrece "Marcar ganada" pero sí "Marcar perdida"', () => {
+    render(
+      <DndContext>
+        <OpportunityCard opp={{ ...opp, status: 'won' }} onAction={() => {}} />
+      </DndContext>,
+    );
+    fireEvent.click(screen.getByLabelText('Acciones'));
+    expect(screen.queryByText('Marcar ganada')).toBeNull();
+    expect(screen.getByText('Marcar perdida')).toBeInTheDocument();
+  });
+
+  it('en una perdida no ofrece "Marcar perdida" pero sí "Marcar ganada"', () => {
+    render(
+      <DndContext>
+        <OpportunityCard opp={{ ...opp, status: 'lost' }} onAction={() => {}} />
+      </DndContext>,
+    );
+    fireEvent.click(screen.getByLabelText('Acciones'));
+    expect(screen.queryByText('Marcar perdida')).toBeNull();
+    expect(screen.getByText('Marcar ganada')).toBeInTheDocument();
+  });
+
   it('resalta el seguimiento vencido con data-testid follow-up-overdue', () => {
     const pastDate = new Date(Date.now() - 86_400_000).toISOString();
     const overdueOpp: Opportunity = { ...opp, nextFollowUpAt: pastDate };
